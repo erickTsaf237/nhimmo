@@ -141,7 +141,7 @@ class _ExitPageState extends State<ExitPage> {
             for (final m in _meters)
               Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Expanded(
-                  child: Field(_indexes[m.meter.id]!, '${Labels.utilityName(m.type)} (${m.type.unit})',
+                  child: Field(_indexes[m.meter.id]!, Labels.utilityName(m.type),
                       icon: utilityIcon(m.type.iconKey),
                       required: true,
                       hint: context.t.lastBilledHint(Num.format(_previous[m.meter.id] ?? 0)),

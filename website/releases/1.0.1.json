@@ -1,0 +1,47 @@
+{
+  "version": "1.0.1",
+  "build": 2,
+  "date": "2026-09-25",
+  "published": true,
+  "minAndroid": "7.0",
+  "notes": {
+    "fr": {
+      "summary": "Affichage des index de compteurs simplifié.",
+      "added": [],
+      "improved": [
+        "Les index de compteurs (précédent, nouvel index, index d'entrée et de sortie) s'affichent sans unité : seule la consommation porte une unité (m³, kWh…)."
+      ],
+      "fixed": []
+    },
+    "en": {
+      "summary": "Simpler display of meter readings.",
+      "added": [],
+      "improved": [
+        "Meter readings (previous, new, move-in and move-out readings) are now shown without a unit: only consumption carries a unit (m³, kWh…)."
+      ],
+      "fixed": []
+    }
+  },
+  "files": {
+    "universal": {
+      "path": "releases/1.0.1/nhimmo-1.0.1-universal.apk",
+      "size": 88273945,
+      "sha256": "41577abd1b6b725aca6e0b12f0c11423394cae61812e03b80c097687cf28067c"
+    },
+    "arm64": {
+      "path": "releases/1.0.1/nhimmo-1.0.1-arm64.apk",
+      "size": 31764442,
+      "sha256": "bfba3c9d23906f5db180ed5185b14f677f6cdfc5932d87f13b0b8ab473444f61"
+    },
+    "armv7": {
+      "path": "releases/1.0.1/nhimmo-1.0.1-armv7.apk",
+      "size": 28453452,
+      "sha256": "6eb042098240ae38fb3c5ec9606853c7d2651f760ff4b6866b5047553ac98cf7"
+    },
+    "x86_64": {
+      "path": "releases/1.0.1/nhimmo-1.0.1-x86_64.apk",
+      "size": 34303957,
+      "sha256": "b7634ed10f40cec7cc1cd55467bf63170118d33d67d69fb99db099feeb897013"
+    }
+  }
+}

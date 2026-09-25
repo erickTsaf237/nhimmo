@@ -299,7 +299,7 @@ class _ContractFormState extends State<ContractForm> {
       padding: const EdgeInsets.only(bottom: 4),
       child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Expanded(
-          child: Field(e.ctrl, '${Labels.utilityName(mv.type)} (${mv.type.unit})',
+          child: Field(e.ctrl, Labels.utilityName(mv.type),
               icon: utilityIcon(mv.type.iconKey),
               keyboard: const TextInputType.numberWithOptions(decimal: true),
               hint: context.t.entryReadingHint,

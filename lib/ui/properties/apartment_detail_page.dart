@@ -168,7 +168,7 @@ class ApartmentDetailPage extends StatelessWidget {
                           ]),
                         ),
                         Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-                          Text('${Num.format(m.last?.value ?? m.mv.meter.initialIndex)} ${m.mv.type.unit}',
+                          Text(Num.format(m.last?.value ?? m.mv.meter.initialIndex),
                               style: const TextStyle(fontWeight: FontWeight.w800)),
                           Text(m.last == null ? context.t.initialIndex : context.t.readOn(Dates.d(m.last!.date)),
                               style: TextStyle(fontSize: 11.5, color: cs.onSurfaceVariant)),

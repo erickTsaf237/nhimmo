@@ -20,6 +20,7 @@ import re
 import shutil
 import subprocess
 import sys
+import time
 import urllib.request
 from pathlib import Path
 
@@ -90,7 +91,15 @@ def upload(token: str, bucket: str, path: str, file: Path, project: str) -> None
     req = urllib.request.Request(url, body, method='POST', headers={
         'Authorization': f'Bearer {token}', 'Content-Type': f'multipart/related; boundary={boundary}',
         'x-goog-user-project': project})
-    urllib.request.urlopen(req, timeout=600).read()
+    for attempt in range(1, 4):
+        try:
+            urllib.request.urlopen(req, timeout=600).read()
+            return
+        except Exception as e:  # coupure réseau : on réessaie
+            if attempt == 3:
+                raise
+            print(f'  envoi interrompu ({e}), nouvel essai {attempt + 1}/3…')
+            time.sleep(5 * attempt)
 
 
 def set_pubspec_version(version: str, build: int) -> None:

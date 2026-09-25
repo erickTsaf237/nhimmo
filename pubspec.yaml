@@ -1,7 +1,7 @@
 name: myimmo
 description: "Gestion locative locale : appartements, locataires, relevés, factures."
 publish_to: 'none'
-version: 1.0.0+1
+version: 1.0.1+2
 
 environment:
   sdk: ^3.11.0

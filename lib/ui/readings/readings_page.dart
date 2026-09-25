@@ -212,7 +212,7 @@ class _MeterTile extends StatelessWidget {
               Text(Labels.utilityName(t), style: const TextStyle(fontWeight: FontWeight.w700)),
               if (m.locked) ...[const SizedBox(width: 6), Icon(Icons.lock_rounded, size: 14, color: cs.outline)],
             ]),
-            Text(context.t.previousValue('${Num.format(m.previous)} ${t.unit}'), style: TextStyle(fontSize: 12.5, color: cs.onSurfaceVariant)),
+            Text(context.t.previousValue(Num.format(m.previous)), style: TextStyle(fontSize: 12.5, color: cs.onSurfaceVariant)),
             if (r != null) ...[
               const SizedBox(height: 4),
               Wrap(spacing: 6, runSpacing: 4, children: [
@@ -302,7 +302,7 @@ class _ReadingSheetState extends State<_ReadingSheet> {
               ),
             ),
           Row(children: [
-            Expanded(child: _Box(context.t.previous, '${Num.format(m.previous)} ${t.unit}')),
+            Expanded(child: _Box(context.t.previous, Num.format(m.previous))),
             const SizedBox(width: 10),
             Expanded(
               child: _Box(context.t.consumption, cons == null ? '—' : '${Num.format(cons)} ${t.unit}',
@@ -318,7 +318,6 @@ class _ReadingSheetState extends State<_ReadingSheet> {
             style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800),
             decoration: InputDecoration(
               labelText: context.t.newReading,
-              suffixText: t.unit,
               errorText: tooLow ? context.t.readingLowerThanPrevious : null,
               helperText: anomaly ? context.t.anomalyHelp(Num.format(m.average!, maxDecimals: 1)) : null,
               helperStyle: const TextStyle(color: AppColors.warning),
