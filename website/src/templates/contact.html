@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{%- from "_icons.html" import icon -%}
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <nav class="crumbs" aria-label="breadcrumb"><a href="{{ r.home }}">{{ t.nav.home }}</a> › {{ t.nav.contact }}</nav>
+    <h1>{{ t.contact.h1 }}</h1>
+    <p>{{ t.contact.lead }}</p>
+  </div>
+</section>
+
+<div class="page-body">
+  <div class="container contact-grid">
+    <form class="card" id="contact-form" novalidate>
+      <div class="row">
+        <div class="field"><label for="c-name">{{ t.contact.name }} *</label><input id="c-name" name="name" autocomplete="name" required maxlength="100"></div>
+        <div class="field"><label for="c-email">{{ t.contact.email }} *</label><input id="c-email" name="email" type="email" autocomplete="email" required maxlength="200"></div>
+      </div>
+      <div class="row">
+        <div class="field"><label for="c-phone">{{ t.contact.phone }}</label><input id="c-phone" name="phone" type="tel" autocomplete="tel" maxlength="40"></div>
+        <div class="field">
+          <label for="c-subject">{{ t.contact.subject }} *</label>
+          <select id="c-subject" name="subject" required>
+            {%- for key, label in t.contact.subjects.items() %}<option value="{{ label }}">{{ label }}</option>{% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="field"><label for="c-message">{{ t.contact.message }} *</label><textarea id="c-message" name="message" required minlength="10" maxlength="5000"></textarea></div>
+      <div class="hp" aria-hidden="true"><label for="c-website">Website</label><input id="c-website" name="website" tabindex="-1" autocomplete="off"></div>
+      <label class="consent"><input type="checkbox" name="consent" required><span>{{ t.contact.consent }} <a href="{{ r.privacy }}">{{ t.footer.legal }}</a></span></label>
+      <button class="btn btn-gold" type="submit" id="c-send">{{ icon('mail') }}<span>{{ t.contact.send }}</span></button>
+      <div class="form-status" id="c-status" role="status" aria-live="polite"></div>
+    </form>
+
+    <aside class="card">
+      <h2 style="font-size:1.25rem">{{ t.contact.direct }}</h2>
+      <ul class="contact-list">
+        <li><span class="ico">{{ icon('mail') }}</span><span><small>E-mail</small><a href="mailto:{{ cfg.contactEmail }}">{{ cfg.contactEmail }}</a></span></li>
+        {%- for p in cfg.developer.phones %}
+        {%- if p == cfg.developer.whatsapp %}
+        <li><span class="ico ico-wa">{{ icon('whatsapp') }}</span><span><small>WhatsApp</small><a href="https://wa.me/{{ p | replace(' ', '') | replace('+', '') }}" rel="noopener" target="_blank">{{ p }}</a></span></li>
+        {%- else %}
+        <li><span class="ico">{{ icon('tel') }}</span><span><small>{{ t.contact.phone | replace(' (facultatif)', '') | replace(' (optional)', '') }}</small><a href="tel:{{ p | replace(' ', '') }}">{{ p }}</a></span></li>
+        {%- endif %}
+        {%- endfor %}
+        <li><span class="ico">{{ icon('pin') }}</span><span>{{ t.contact.location }}</span></li>
+        <li><span class="ico">{{ icon('github') }}</span><a href="{{ cfg.developer.github }}" rel="noopener me" target="_blank">GitHub</a></li>
+        <li><span class="ico">{{ icon('linkedin') }}</span><a href="{{ cfg.developer.linkedin }}" rel="noopener me" target="_blank">LinkedIn</a></li>
+      </ul>
+      <div class="dev">
+        <img src="/assets/img/logo-96.png" alt="" width="56" height="56" loading="lazy">
+        <div><small class="muted">{{ t.contact.developer }}</small><br><strong>{{ cfg.developer.name }}</strong><br><span class="muted">{{ cfg.developer.jobTitle if t.lang == 'fr' else cfg.developer.jobTitleEn }}</span></div>
+      </div>
+    </aside>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+  <script type="module" src="{{ asset('js/contact.js') }}"></script>
+{%- endblock %}

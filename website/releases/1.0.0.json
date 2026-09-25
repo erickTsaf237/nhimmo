@@ -1,0 +1,73 @@
+{
+  "version": "1.0.0",
+  "build": 1,
+  "date": "2026-09-25",
+  "published": true,
+  "minAndroid": "7.0",
+  "notes": {
+    "fr": {
+      "summary": "Première version publique de NHimmo : toute la gestion locative sur votre téléphone, hors ligne.",
+      "added": [
+        "Gestion des propriétaires, immeubles, appartements, compteurs et locataires.",
+        "Contrats de location avec prorata à l'entrée et à la sortie, et reconduction tacite.",
+        "Relevés mensuels des compteurs avec photo et détection des consommations anormales.",
+        "Types de compteurs configurables (eau, électricité, gaz…) : prix unitaire, entretien et TVA.",
+        "Facturation automatique du mois : loyer, consommations, services (parking…) et TVA.",
+        "Avantages par locataire : exonération, réduction ou unités gratuites, suspendables en cours de bail.",
+        "Paiements, avances déduites automatiquement et quittances PDF.",
+        "Suivi des cautions incomplètes et reçus de caution.",
+        "Fin de bail : état des lieux pièce par pièce, dégâts déduits de la caution et décompte de sortie.",
+        "Factures, quittances et décomptes signés par QR code, avec lecteur de vérification intégré.",
+        "Tableaux de bord global, par propriétaire, par appartement et par locataire.",
+        "Exports Excel et CSV des relevés, de la facturation ou de toutes les données.",
+        "Sauvegarde et restauration complètes (données et photos).",
+        "Application en français et en anglais, documents dans la langue de chaque locataire."
+      ],
+      "improved": [],
+      "fixed": []
+    },
+    "en": {
+      "summary": "First public release of NHimmo: complete rental management on your phone, offline.",
+      "added": [
+        "Management of owners, buildings, apartments, meters and tenants.",
+        "Leases with prorated move-in and move-out, and automatic renewal.",
+        "Monthly meter readings with photos and unusual consumption detection.",
+        "Configurable meter types (water, electricity, gas…): unit price, maintenance and VAT.",
+        "Automatic monthly billing: rent, consumption, services (parking…) and VAT.",
+        "Tenant benefits: exemption, discount or free units, which can be suspended during the lease.",
+        "Payments, automatically deducted credit and PDF receipts.",
+        "Tracking of incomplete deposits and deposit receipts.",
+        "Move-out: room-by-room inspection, damages deducted from the deposit and move-out statement.",
+        "Invoices, receipts and statements signed with a QR code, with a built-in verification scanner.",
+        "Dashboards: overall, per owner, per apartment and per tenant.",
+        "Excel and CSV exports of readings, billing or all data.",
+        "Full backup and restore (data and photos).",
+        "App in French and English, documents in each tenant's language."
+      ],
+      "improved": [],
+      "fixed": []
+    }
+  },
+  "files": {
+    "universal": {
+      "path": "releases/1.0.0/nhimmo-1.0.0-universal.apk",
+      "size": 88273941,
+      "sha256": "7539099db4b05c348445f69d51bd71005605dabcbbb7629b87c62e4a9af73fab"
+    },
+    "arm64": {
+      "path": "releases/1.0.0/nhimmo-1.0.0-arm64.apk",
+      "size": 31764442,
+      "sha256": "8bfc7b4a3b4b1de444ee7908302d071c9011ce199c1afaa47cc2491c995cb9ba"
+    },
+    "armv7": {
+      "path": "releases/1.0.0/nhimmo-1.0.0-armv7.apk",
+      "size": 28453452,
+      "sha256": "6b8e5cba5a356121d6ee53000d5774689a5b4924abca7ed456384ad674ebf68c"
+    },
+    "x86_64": {
+      "path": "releases/1.0.0/nhimmo-1.0.0-x86_64.apk",
+      "size": 34303957,
+      "sha256": "9cebf46bec785883685e31e88ff00bd3733ffaf03a85b3013e1479251b3393b8"
+    }
+  }
+}

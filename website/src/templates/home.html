@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{%- from "_icons.html" import icon -%}
+{% macro phone(s, eager=false) -%}
+<div class="phone"><img src="{{ s.src }}" width="{{ s.w }}" height="{{ s.h }}" alt="{{ s.alt }}"{% if eager %} fetchpriority="high"{% else %} loading="lazy" decoding="async"{% endif %}></div>
+{%- endmacro %}
+{% block preload %}
+  <link rel="preload" as="image" href="{{ screens.dashboard.src }}" type="image/webp">
+{%- endblock %}
+{% block content %}
+<section class="hero">
+  <div class="container hero-grid">
+    <div>
+      <span class="badge">{{ icon('android') }}{{ t.home.hero_badge }}</span>
+      <h1>{{ t.home.hero_title | safe }}</h1>
+      <p class="lead">{{ t.home.hero_text }}</p>
+      <div class="hero-actions">
+        <a class="btn btn-gold" href="{{ r.download }}">{{ icon('download') }}{{ t.common.download_cta }}</a>
+        <a class="btn btn-ghost" href="#fonctionnalites">{{ t.home.hero_secondary }}</a>
+      </div>
+      <p class="hero-meta">{{ t.common.free }} · {{ t.common.android_only }}{% if latest %} · {{ t.common.version }} {{ latest.version }}{% endif %}</p>
+      <ul class="trust">
+        <li>{{ icon('lock') }}{{ t.home.trust_local }}</li>
+        <li>{{ icon('qr') }}{{ t.home.trust_pdf }}</li>
+        <li>{{ icon('globe') }}{{ t.home.trust_lang }}</li>
+      </ul>
+    </div>
+    <div class="hero-phones">
+      {{ phone(screens.contract) }}
+      {{ phone(screens.dashboard, true) }}
+    </div>
+  </div>
+</section>
+
+<section id="fonctionnalites" aria-labelledby="features-title">
+  <div class="container">
+    <div class="section-head">
+      <span class="kicker">{{ t.home.features_kicker }}</span>
+      <h2 id="features-title">{{ t.home.features_title }}</h2>
+      <p>{{ t.home.features_text }}</p>
+    </div>
+    <div class="features">
+      {%- for f in t.home.features %}
+      <article class="card feature">
+        <div class="ico">{{ icon(f.icon) }}</div>
+        <h3>{{ f.title }}</h3>
+        <p>{{ f.text }}</p>
+      </article>
+      {%- endfor %}
+    </div>
+  </div>
+</section>
+
+<section aria-label="{{ t.home.spot1_title }}">
+  <div class="container">
+    {%- for n, shot in [(1, 'reading_sheet'), (2, 'pdf'), (3, 'contract')] %}
+    <div class="spot{% if n == 2 %} reverse{% endif %}">
+      <div class="spot-media">{{ phone(screens[shot]) }}</div>
+      <div>
+        <span class="kicker">{{ t.home['spot%d_kicker' % n] }}</span>
+        <h2>{{ t.home['spot%d_title' % n] }}</h2>
+        <p>{{ t.home['spot%d_text' % n] }}</p>
+        <ul class="checks">
+          {%- for point in t.home['spot%d_points' % n] %}
+          <li>{{ icon('check') }}{{ point }}</li>
+          {%- endfor %}
+        </ul>
+      </div>
+    </div>
+    {%- endfor %}
+  </div>
+</section>
+
+<section aria-labelledby="steps-title">
+  <div class="container">
+    <div class="section-head">
+      <span class="kicker">{{ t.home.steps_kicker }}</span>
+      <h2 id="steps-title">{{ t.home.steps_title }}</h2>
+    </div>
+    <ol class="steps" style="list-style:none;padding:0;margin:0">
+      {%- for s in t.home.steps %}
+      <li class="card step"><h3>{{ s.title }}</h3><p>{{ s.text }}</p></li>
+      {%- endfor %}
+    </ol>
+  </div>
+</section>
+
+<section id="apercu" aria-labelledby="gallery-title">
+  <div class="container">
+    <div class="section-head">
+      <span class="kicker">{{ t.home.gallery_kicker }}</span>
+      <h2 id="gallery-title">{{ t.home.gallery_title }}</h2>
+    </div>
+    <div class="gallery" tabindex="0" aria-label="{{ t.home.gallery_title }}">
+      {%- for key in ['dashboard', 'properties', 'rentals', 'contract', 'readings', 'reading_sheet', 'invoices', 'invoice', 'pdf'] %}
+      <figure>{{ phone(screens[key]) }}<figcaption>{{ t.screens[key] }}</figcaption></figure>
+      {%- endfor %}
+    </div>
+  </div>
+</section>
+
+<section aria-labelledby="privacy-title" style="padding-top:0">
+  <div class="container">
+    <div class="band">
+      <div class="ico">{{ icon('lock') }}</div>
+      <div>
+        <h2 id="privacy-title">{{ t.home.privacy_title }}</h2>
+        <p>{{ t.home.privacy_text }}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="faq" aria-labelledby="faq-title" style="padding-top:0">
+  <div class="container">
+    <div class="section-head">
+      <span class="kicker">{{ t.home.faq_kicker }}</span>
+      <h2 id="faq-title">{{ t.home.faq_title }}</h2>
+    </div>
+    <div class="faq">
+      {%- for f in t.home.faq %}
+      <details{% if loop.first %} open{% endif %}><summary>{{ f.q }}</summary><p>{{ f.a }}</p></details>
+      {%- endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="cta" style="padding-top:0">
+  <div class="container">
+    <div class="band">
+      <h2>{{ t.home.cta_title }}</h2>
+      <p>{{ t.home.cta_text }}</p>
+      <a class="btn btn-gold" href="{{ r.download }}">{{ icon('download') }}{{ t.common.download_cta }}</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

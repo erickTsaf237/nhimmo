@@ -1,0 +1,14 @@
+rules_version = '2';
+
+// NHimmo — fichiers d'installation publics en lecture, tout le reste fermé.
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /releases/{allPaths=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

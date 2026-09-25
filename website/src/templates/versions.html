@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{%- from "_icons.html" import icon -%}
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <nav class="crumbs" aria-label="breadcrumb"><a href="{{ r.home }}">{{ t.nav.home }}</a> › {{ t.nav.versions }}</nav>
+    <h1>{{ t.versions.h1 }}</h1>
+    <p>{{ t.versions.lead }}</p>
+  </div>
+</section>
+
+<div class="page-body">
+  <div class="container">
+    <div class="timeline" id="releases">
+      {%- for rel in releases %}
+      <article class="card release" id="v{{ rel.version }}">
+        <header>
+          <h2>{{ t.common.version }} {{ rel.version }}</h2>
+          {% if loop.first %}<span class="tag">{{ t.common.latest }}</span>{% endif %}
+          <time datetime="{{ rel.date }}">{{ t.common.released }} {{ rel.date_display }}</time>
+        </header>
+        {%- if rel.notes.summary %}<p class="summary">{{ rel.notes.summary }}</p>{% endif %}
+        {%- for kind in ['added', 'improved', 'fixed'] if rel.notes[kind] %}
+        <h3 class="{{ kind }}">{{ t.versions[kind] }}</h3>
+        <ul>{% for item in rel.notes[kind] %}<li>{{ item }}</li>{% endfor %}</ul>
+        {%- endfor %}
+        {%- if rel.files %}
+        <details>
+          <summary>{{ t.versions.files }} · {{ t.versions.min_android }} {{ rel.minAndroid }}</summary>
+          <div class="files">
+            {%- for key in ['universal', 'arm64', 'armv7', 'x86_64'] if rel.files[key] %}
+            <a class="btn btn-navy btn-small" href="{{ rel.files[key].url }}" download>{{ icon('download') }}{{ t.download.variants[key].name }} · {{ rel.files[key].size_display }}</a>
+            {%- endfor %}
+          </div>
+        </details>
+        {%- endif %}
+      </article>
+      {%- else %}
+      <p class="center muted">{{ t.versions.empty }}</p>
+      {%- endfor %}
+    </div>
+    <p class="center mt"><a class="btn btn-gold" href="{{ r.download }}">{{ icon('download') }}{{ t.common.download_cta }}</a></p>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+  <script type="module" src="{{ asset('js/releases.js') }}"></script>
+{%- endblock %}

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <h1>{{ t.notfound.h1 }}</h1>
+    <p>{{ t.notfound.text }}</p>
+  </div>
+</section>
+<div class="page-body">
+  <div class="container center">
+    <p><a class="btn btn-navy" href="{{ r.home }}">{{ t.common.back_home }}</a></p>
+    <p class="mt"><a href="{{ other.home }}" hreflang="{{ other.lang }}" lang="{{ other.lang }}">{{ other.notfound_h1 }} · {{ other.back_home }}</a></p>
+  </div>
+</div>
+{% endblock %}

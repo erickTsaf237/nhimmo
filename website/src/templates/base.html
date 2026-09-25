@@ -1,0 +1,125 @@
+{%- from "_icons.html" import icon -%}
+<!doctype html>
+<html lang="{{ t.lang }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>{{ page.title }}</title>
+  <meta name="description" content="{{ page.description }}">
+  <meta name="robots" content="{{ page.robots }}">
+  <meta name="author" content="{{ cfg.developer.name }}">
+  <meta name="application-name" content="{{ cfg.appName }}">
+  <meta name="theme-color" content="{{ cfg.themeColor }}">
+  <meta name="format-detection" content="telephone=no">
+{%- if page.canonical %}
+  <link rel="canonical" href="{{ page.url }}">
+  <link rel="alternate" hreflang="fr" href="{{ page.alternates.fr }}">
+  <link rel="alternate" hreflang="en" href="{{ page.alternates.en }}">
+  <link rel="alternate" hreflang="x-default" href="{{ page.alternates.fr }}">
+{%- endif %}
+
+  <!-- Aperçu des liens partagés (WhatsApp, Facebook, LinkedIn, Telegram…) -->
+  <meta property="og:type" content="{{ page.og_type }}">
+  <meta property="og:site_name" content="{{ cfg.appName }}">
+  <meta property="og:title" content="{{ page.og_title }}">
+  <meta property="og:description" content="{{ page.og_description }}">
+  <meta property="og:url" content="{{ page.url }}">
+  <meta property="og:locale" content="{{ t.locale }}">
+  <meta property="og:locale:alternate" content="{{ other.locale }}">
+  <meta property="og:image" content="{{ page.og_image }}">
+  <meta property="og:image:secure_url" content="{{ page.og_image }}">
+  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="{{ t.seo.og_image_alt }}">
+  <!-- X / Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{ page.og_title }}">
+  <meta name="twitter:description" content="{{ page.og_description }}">
+  <meta name="twitter:image" content="{{ page.og_image }}">
+  <meta name="twitter:image:alt" content="{{ t.seo.og_image_alt }}">
+
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" href="/assets/img/icon-192.png" type="image/png" sizes="192x192">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.webmanifest">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="{{ asset('css/style.css') }}">
+{%- block preload %}{% endblock %}
+{%- for data in page.jsonld %}
+  <script type="application/ld+json">{{ data | tojson }}</script>
+{%- endfor %}
+  <script type="application/json" id="nh-config">{{ client_config | tojson }}</script>
+</head>
+<body>
+  <a class="skip" href="#main">{{ t.skip }}</a>
+  <header class="site-header">
+    <nav class="nav container" aria-label="{{ t.nav.menu }}">
+      <a class="brand" href="{{ r.home }}"><img src="/assets/img/logo-96.png" alt="" width="38" height="38">{{ cfg.appName }}</a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-links" aria-label="{{ t.nav.menu }}">{{ icon('menu') }}</button>
+      <div class="nav-links" id="nav-links">
+        <a href="{{ r.home }}#fonctionnalites"{% if page.key == 'home' %} data-section{% endif %}>{{ t.nav.features }}</a>
+        <a href="{{ r.home }}#apercu">{{ t.nav.screens }}</a>
+        <a href="{{ r.versions }}"{% if page.key == 'versions' %} aria-current="page"{% endif %}>{{ t.nav.versions }}</a>
+        <a href="{{ r.contact }}"{% if page.key == 'contact' %} aria-current="page"{% endif %}>{{ t.nav.contact }}</a>
+        <a class="lang-switch" href="{{ other.path }}" hreflang="{{ other.lang }}" lang="{{ other.lang }}">{{ t.switch_label }}</a>
+        <a class="btn btn-gold btn-small" href="{{ r.download }}">{{ icon('download') }}{{ t.nav.download }}</a>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main">
+{% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <a class="brand" href="{{ r.home }}"><img src="/assets/img/logo-96.png" alt="" width="38" height="38" loading="lazy">{{ cfg.appName }}</a>
+          <p class="mt">{{ t.footer.about }}</p>
+        </div>
+        <div>
+          <h2>{{ t.footer.product }}</h2>
+          <ul>
+            <li><a href="{{ r.home }}#fonctionnalites">{{ t.nav.features }}</a></li>
+            <li><a href="{{ r.download }}">{{ t.nav.download }}</a></li>
+            <li><a href="{{ r.versions }}">{{ t.nav.versions }}</a></li>
+          </ul>
+        </div>
+        <div>
+          <h2>{{ t.footer.resources }}</h2>
+          <ul>
+            <li><a href="{{ r.contact }}">{{ t.nav.contact }}</a></li>
+            <li><a href="{{ r.privacy }}">{{ t.footer.legal }}</a></li>
+            <li><a href="{{ other.path }}" hreflang="{{ other.lang }}" lang="{{ other.lang }}">{{ t.switch_label }}</a></li>
+          </ul>
+        </div>
+        <div>
+          <h2>{{ t.nav.contact }}</h2>
+          <ul>
+            <li><a href="mailto:{{ cfg.contactEmail }}">{{ cfg.contactEmail }}</a></li>
+            {%- for p in cfg.developer.phones %}
+            {%- if p == cfg.developer.whatsapp %}
+            <li><a class="wa-link" href="https://wa.me/{{ p | replace(' ', '') | replace('+', '') }}" rel="noopener" target="_blank">{{ icon('whatsapp') }}{{ p }}</a></li>
+            {%- else %}
+            <li><a href="tel:{{ p | replace(' ', '') }}">{{ p }}</a></li>
+            {%- endif %}
+            {%- endfor %}
+            <li>{{ t.contact.location }}</li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© {{ year }} {{ cfg.appName }}. {{ t.footer.rights }}</span>
+        <span>{{ t.footer.made_by }} <a href="{{ cfg.developer.linkedin }}" rel="noopener author" target="_blank">{{ cfg.developer.name }}</a></span>
+      </div>
+    </div>
+  </footer>
+  <script src="{{ asset('js/site.js') }}" defer></script>
+{%- block scripts %}{% endblock %}
+</body>
+</html>

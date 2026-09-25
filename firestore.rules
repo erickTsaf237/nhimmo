@@ -1,0 +1,22 @@
+rules_version = '2';
+
+// NHimmo — règles Firestore du site vitrine.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Versions de l'application : lecture publique des versions publiées uniquement.
+    // Écriture réservée à la console Firebase et au script tools/publish_release.py.
+    match /releases/{version} {
+      allow get, list: if resource.data.published == true;
+      allow write: if false;
+    }
+
+    // Messages de contact (contact_messages) et limitation d'envoi (contact_rate) :
+    // écrits uniquement par la Cloud Function « contact », fermés au public.
+
+    // Tout le reste est fermé.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

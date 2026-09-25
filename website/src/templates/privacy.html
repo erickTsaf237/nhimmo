@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <nav class="crumbs" aria-label="breadcrumb"><a href="{{ r.home }}">{{ t.nav.home }}</a> › {{ t.footer.legal }}</nav>
+    <h1>{{ t.privacy.h1 }}</h1>
+    <p>{{ t.privacy.updated }} : <time datetime="{{ today }}">{{ today_display }}</time></p>
+  </div>
+</section>
+<div class="page-body">
+  <div class="container prose">
+    {%- for s in t.privacy.sections %}
+    <h2>{{ s.h }}</h2>
+    {%- for p in s.p %}<p>{{ p }}</p>{% endfor %}
+    {%- endfor %}
+    <p><a href="{{ r.contact }}">{{ t.nav.contact }} →</a></p>
+  </div>
+</div>
+{% endblock %}

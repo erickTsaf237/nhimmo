@@ -1,0 +1,24 @@
+{
+  "siteUrl": "https://nhimmo.web.app",
+  "projectId": "nhimmo",
+  "storageBucket": "nhimmo.firebasestorage.app",
+  "appName": "NHimmo",
+  "androidPackage": "com.erick.myimmo",
+  "minAndroid": "7.0",
+  "themeColor": "#0B1B3D",
+  "contactEmail": "ericktsafack2017@gmail.com",
+  "developer": {
+    "name": "Erick Tsafack Nteudem",
+    "jobTitle": "Développeur Web et Mobile",
+    "jobTitleEn": "Web and Mobile Developer",
+    "phones": [
+      "+237 654 19 05 14",
+      "+237 657 50 10 03"
+    ],
+    "github": "https://github.com/erickTsaf237",
+    "linkedin": "https://www.linkedin.com/in/erick-tsafack-40037423a",
+    "city": "Dschang",
+    "country": "CM",
+    "whatsapp": "+237 657 50 10 03"
+  }
+}

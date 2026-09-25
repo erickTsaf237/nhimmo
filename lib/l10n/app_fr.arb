@@ -1,0 +1,1444 @@
+{
+  "@@locale": "fr",
+  "languageName": "Français",
+  "appTitle": "NHimmo",
+  "lineRent": "Loyer {month}",
+  "@lineRent": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "lineProrata": "{days}/{total} jours",
+  "@lineProrata": {
+    "placeholders": {
+      "days": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "lineIndex": "Index {from} à {to}",
+  "@lineIndex": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "lineConsumption": "{qty} {unit} × {price}",
+  "@lineConsumption": {
+    "placeholders": {
+      "qty": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      },
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "lineMaintenance": "Entretien compteur {amount}",
+  "@lineMaintenance": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "lineVat": "TVA {rate} % ({mode})",
+  "@lineVat": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      },
+      "mode": {
+        "type": "String"
+      }
+    }
+  },
+  "vatIncludedShort": "incluse",
+  "vatAddedShort": "en sus",
+  "lineServiceIncluded": "{qty} {unit}(s), {included} inclus, {billed} facturé(s)",
+  "@lineServiceIncluded": {
+    "placeholders": {
+      "qty": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      },
+      "included": {
+        "type": "String"
+      },
+      "billed": {
+        "type": "String"
+      }
+    }
+  },
+  "lineServiceQty": "{qty} {unit}(s)",
+  "@lineServiceQty": {
+    "placeholders": {
+      "qty": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "lineDamages": "Dégâts constatés (état des lieux de sortie)",
+  "lineCredit": "Déduction loyer et services – {days} jour(s) non occupé(s)",
+  "@lineCredit": {
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "lineBenefit": "Avantage {name}",
+  "@lineBenefit": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "benefitFull": "Exonération totale",
+  "benefitPercent": "Réduction de {value} %",
+  "@benefitPercent": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "benefitUnits": "{value} {unit} gratuits par mois",
+  "@benefitUnits": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "benefitAmount": "{amount} déduits par mois",
+  "@benefitAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "benefitModePercent": "Réduction en %",
+  "benefitModeUnits": "Unités gratuites / mois",
+  "benefitModeAmount": "Montant fixe déduit / mois",
+  "vatNone": "Pas de TVA",
+  "vatIncluded": "TVA incluse dans le prix",
+  "vatAdded": "TVA en sus",
+  "roomLiving": "Salon",
+  "roomDining": "Salle à manger",
+  "roomKitchen": "Cuisine",
+  "roomBedroom": "Chambre",
+  "roomBedroomN": "Chambre {n}",
+  "@roomBedroomN": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "roomBathroom": "Salle de bain",
+  "roomToilet": "WC",
+  "roomHallway": "Couloir",
+  "roomBalcony": "Balcon",
+  "roomTerrace": "Terrasse",
+  "roomGarage": "Garage",
+  "roomOutside": "Extérieur",
+  "condNew": "Neuf",
+  "condGood": "Bon",
+  "condWorn": "Usé",
+  "condDamaged": "Dégradé",
+  "condBroken": "Hors service",
+  "methodCash": "Espèces",
+  "methodMobile": "Mobile Money",
+  "methodTransfer": "Virement",
+  "methodCheque": "Chèque",
+  "methodOther": "Autre",
+  "methodDeposit": "Caution",
+  "payStatusPaid": "Payée",
+  "payStatusPartial": "Partielle",
+  "payStatusUnpaid": "Impayée",
+  "warnMissingReading": "{place} : relevé {meter} manquant",
+  "@warnMissingReading": {
+    "placeholders": {
+      "place": {
+        "type": "String"
+      },
+      "meter": {
+        "type": "String"
+      }
+    }
+  },
+  "warnIndexLower": "{place} : index {meter} inférieur au précédent",
+  "@warnIndexLower": {
+    "placeholders": {
+      "place": {
+        "type": "String"
+      },
+      "meter": {
+        "type": "String"
+      }
+    }
+  },
+  "warnExitIndexMissing": "Index de sortie {meter} non saisi",
+  "@warnExitIndexMissing": {
+    "placeholders": {
+      "meter": {
+        "type": "String"
+      }
+    }
+  },
+  "warnExitIndexLower": "Index {meter} inférieur au dernier index facturé",
+  "@warnExitIndexLower": {
+    "placeholders": {
+      "meter": {
+        "type": "String"
+      }
+    }
+  },
+  "docInvoice": "Facture",
+  "docReceipt": "Quittance",
+  "docExit": "Décompte de sortie",
+  "errorWith": "Erreur : {error}",
+  "@errorWith": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "requiredField": "Champ obligatoire",
+  "amountRequired": "Montant obligatoire",
+  "amountInvalid": "Montant invalide",
+  "save": "Enregistrer",
+  "cancel": "Annuler",
+  "confirm": "Confirmer",
+  "delete": "Supprimer",
+  "edit": "Modifier",
+  "add": "Ajouter",
+  "close": "Fermer",
+  "validate": "Valider",
+  "newItem": "Nouveau",
+  "notes": "Notes",
+  "note": "Note",
+  "phone": "Téléphone",
+  "email": "E-mail",
+  "address": "Adresse",
+  "navHome": "Accueil",
+  "navProperties": "Biens",
+  "navRentals": "Locations",
+  "navReadings": "Relevés",
+  "navFinance": "Finances",
+  "language": "Langue",
+  "appLanguage": "Langue de l'application",
+  "systemLanguage": "Langue du téléphone",
+  "documentLanguage": "Langue des documents",
+  "documentLanguageHelp": "Factures, quittances et décompte de ce locataire seront produits dans cette langue.",
+  "sameAsApp": "Comme l'application ({lang})",
+  "@sameAsApp": {
+    "placeholders": {
+      "lang": {
+        "type": "String"
+      }
+    }
+  },
+  "hello": "Bonjour 👋",
+  "scanDocument": "Scanner un document",
+  "settings": "Paramètres",
+  "collectedThisMonth": "Encaissé ce mois",
+  "forBilledIn": "pour {amount} facturés en {month}",
+  "@forBilledIn": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "actionRead": "Relever",
+  "actionCollect": "Encaisser",
+  "actionScan": "Scanner",
+  "actionExport": "Exporter",
+  "occupancy": "Occupation",
+  "apartmentsCount": "{occupied} / {total} appartements",
+  "@apartmentsCount": {
+    "placeholders": {
+      "occupied": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "unpaid": "Impayés",
+  "lateInvoices": "{count} facture(s) en retard",
+  "@lateInvoices": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "noDelay": "Aucun retard",
+  "readingsOfMonth": "Relevés du mois",
+  "done": "Terminé",
+  "toComplete": "À compléter",
+  "lastBilling": "Dernière facturation",
+  "billedVsCollected": "Facturé vs encaissé",
+  "billed": "Facturé",
+  "collected": "Encaissé",
+  "consumptionOf": "Consommations · {month}",
+  "@consumptionOf": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "balancesToRecover": "Soldes à recouvrer",
+  "endContractFirst": "Terminez d'abord le contrat en cours.",
+  "reactivateQ": "Réactiver ?",
+  "archiveQ": "Archiver ?",
+  "aptWillReappear": "L'appartement réapparaîtra dans les listes et relevés.",
+  "aptWillDisappear": "L'appartement n'apparaîtra plus dans les listes et relevés.",
+  "reactivate": "Réactiver",
+  "archive": "Archiver",
+  "rent": "Loyer",
+  "deposit": "Caution",
+  "sinceDate": "Depuis le {date}",
+  "@sinceDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "aptFree": "Appartement libre",
+  "rentOut": "Louer",
+  "meters": "Compteurs",
+  "noMeters": "Aucun compteur. Ajoutez-en pour facturer les consommations.",
+  "serialUnknown": "N° non renseigné",
+  "serialNo": "N° {serial}",
+  "@serialNo": {
+    "placeholders": {
+      "serial": {
+        "type": "String"
+      }
+    }
+  },
+  "initialIndex": "Index initial",
+  "readOn": "relevé {date}",
+  "@readOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "consumption": "Consommation",
+  "leaseHistory": "Historique des locations",
+  "ongoing": "en cours",
+  "buildings": "Immeubles",
+  "monthlyRents": "Loyers mensuels",
+  "billedYear": "Facturé {year}",
+  "@billedYear": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "collectedYear": "Encaissé {year}",
+  "@collectedYear": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "unpaidAmount": "Impayés : {amount}",
+  "@unpaidAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "apartments": "Appartements",
+  "owners": "Propriétaires",
+  "noApartment": "Aucun appartement",
+  "noApartmentHelp": "Commencez par créer un propriétaire, puis un immeuble, puis ses appartements.",
+  "pillApartments": "appartements",
+  "pillOccupied": "occupés",
+  "pillFree": "libres",
+  "floorN": "Étage {floor}",
+  "@floorN": {
+    "placeholders": {
+      "floor": {
+        "type": "String"
+      }
+    }
+  },
+  "free": "Libre",
+  "perMonth": "/ mois",
+  "noBuilding": "Aucun immeuble",
+  "noBuildingHelp": "Un immeuble regroupe les appartements d'un propriétaire.",
+  "addressUnknown": "Adresse non renseignée",
+  "ownerIs": "Propriétaire : {name}",
+  "@ownerIs": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "occupiedRatio": "{occupied}/{total} occupés",
+  "@occupiedRatio": {
+    "placeholders": {
+      "occupied": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "noOwner": "Aucun propriétaire",
+  "noOwnerHelp": "Ajoutez le ou les propriétaires des biens gérés.",
+  "aptCount": "{count} appt(s)",
+  "@aptCount": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "newOwner": "Nouveau propriétaire",
+  "editOwner": "Modifier le propriétaire",
+  "ownerHasBuildings": "Ce propriétaire possède des immeubles.",
+  "deleteQ": "Supprimer ?",
+  "fullName": "Nom complet",
+  "newBuilding": "Nouvel immeuble",
+  "editBuilding": "Modifier l'immeuble",
+  "createOwnerFirst": "Créez d'abord le propriétaire de l'immeuble.",
+  "createOwner": "Créer un propriétaire",
+  "buildingHasApts": "Cet immeuble contient des appartements.",
+  "ownerRequired": "Propriétaire *",
+  "chooseOwner": "Choisissez un propriétaire",
+  "buildingName": "Nom de l'immeuble",
+  "buildingNameHint": "ex. Résidence Les Palmiers",
+  "newApartment": "Nouvel appartement",
+  "editApartment": "Modifier l'appartement",
+  "aptNeedsBuilding": "Un appartement appartient à un immeuble. Créez-en un d'abord.",
+  "createBuilding": "Créer un immeuble",
+  "buildingRequired": "Immeuble *",
+  "chooseBuilding": "Choisissez un immeuble",
+  "aptName": "Nom / numéro",
+  "aptNameHint": "ex. A3, Studio 12",
+  "floor": "Étage",
+  "description": "Description",
+  "aptDescHint": "ex. 2 chambres, salon, cuisine",
+  "defaultRent": "Loyer mensuel par défaut",
+  "defaultDeposit": "Caution par défaut",
+  "metersToCreate": "Compteurs à créer",
+  "newMeter": "Nouveau compteur",
+  "editMeter": "Modifier le compteur",
+  "typeRequired": "Type *",
+  "chooseType": "Choisissez un type",
+  "serialNumber": "N° de série",
+  "indexInvalid": "Index invalide",
+  "deactivate": "Désactiver",
+  "tabOngoing": "En cours",
+  "tabEnded": "Terminées",
+  "tenants": "Locataires",
+  "noActiveLease": "Aucune location en cours",
+  "noEndedLease": "Aucune location terminée",
+  "noActiveLeaseHelp": "Créez un contrat pour attribuer un appartement libre à un locataire.",
+  "leftOn": "Sorti le {date}",
+  "@leftOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "dueAmount": "Dû {amount}",
+  "@dueAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "advanceAmount": "Avance {amount}",
+  "@advanceAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "toRefund": "À rembourser",
+  "upToDate": "À jour",
+  "noTenant": "Aucun locataire",
+  "newTenant": "Nouveau locataire",
+  "tenantHasLeases": "Ce locataire a des contrats : suppression impossible.",
+  "idNumber": "N° pièce d'identité",
+  "emergencyContact": "Personne à prévenir",
+  "leases": "Contrats",
+  "noLease": "Aucun contrat.",
+  "newLease": "Nouvelle location",
+  "noFreeApartment": "Aucun appartement libre",
+  "noFreeApartmentHelp": "Tous les appartements sont occupés ou aucun n'a été créé.",
+  "editLease": "Modifier le contrat",
+  "createLease": "Créer le contrat",
+  "aptAndTenant": "Appartement et locataire",
+  "apartmentRequired": "Appartement *",
+  "chooseApartment": "Choisissez un appartement",
+  "tenantRequired": "Locataire *",
+  "chooseTenant": "Choisissez un locataire",
+  "conditions": "Conditions",
+  "entryDate": "Date d'entrée",
+  "initialTermEndOptional": "Fin de la période initiale (facultatif)",
+  "tacitRenewal": "Reconduction tacite",
+  "tacitOnHelp": "À l'échéance, le bail est prolongé d'une période de même durée.",
+  "tacitOffHelp": "Le bail sera signalé comme échu, mais reste actif jusqu'à sa clôture.",
+  "monthlyRent": "Loyer mensuel",
+  "depositRequired": "Caution exigée",
+  "depositPaid": "Caution effectivement versée",
+  "firstMonthProrata": "Premier mois au prorata",
+  "firstMonthProrataOn": "Le loyer du mois d'entrée est calculé au nombre de jours.",
+  "firstMonthProrataOff": "Le locataire paie le mois d'entrée en entier.",
+  "services": "Services",
+  "noServices": "Aucun service (parking, gardiennage…).",
+  "service": "Service",
+  "serviceQtySummary": "{qty} au total, {included} inclus → {billed} facturé(s)",
+  "@serviceQtySummary": {
+    "placeholders": {
+      "qty": {
+        "type": "String"
+      },
+      "included": {
+        "type": "String"
+      },
+      "billed": {
+        "type": "String"
+      }
+    }
+  },
+  "amountPerMonth": "{amount}/mois",
+  "@amountPerMonth": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "entryReadings": "Index d'entrée",
+  "entryReadingHint": "Laisser vide pour utiliser le dernier index connu",
+  "serviceRequired": "Service *",
+  "chooseService": "Choisissez un service",
+  "totalQuantity": "Quantité totale",
+  "includedQuantity": "Dont inclus",
+  "number": "Nombre",
+  "extraUnitPrice": "Prix par unité supplémentaire / mois",
+  "extraUnitHelp": "ex. 3 véhicules dont 1 autorisé → 2 facturés",
+  "tenantSheet": "Fiche locataire",
+  "apartmentSheet": "Fiche appartement",
+  "entryInspection": "État des lieux d'entrée",
+  "exitInspection": "État des lieux de sortie",
+  "statusOngoingCaps": "EN COURS",
+  "statusEndedCaps": "TERMINÉ",
+  "remainingToPay": "Reste à payer",
+  "tenantAdvance": "Avance du locataire",
+  "refundToTenant": "À rembourser au locataire",
+  "accountUpToDate": "Compte à jour",
+  "refund": "Rembourser",
+  "endLease": "Mettre fin au contrat",
+  "endLeaseHelp": "Index de sortie, état des lieux, caution et solde",
+  "exitDocument": "Document de fin de contrat",
+  "exitDocumentHelp": "Détail complet et solde final",
+  "lease": "Contrat",
+  "moveIn": "Entrée",
+  "moveOut": "Sortie",
+  "depositPaidShort": "Caution versée",
+  "firstMonth": "Premier mois",
+  "lastMonth": "Dernier mois",
+  "prorated": "Au prorata",
+  "fullMonth": "Mois complet",
+  "damagesRetained": "Dégâts retenus",
+  "serviceLine": "{qty} ({included} inclus) · {price}",
+  "@serviceLine": {
+    "placeholders": {
+      "qty": {
+        "type": "String"
+      },
+      "included": {
+        "type": "String"
+      },
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "totalBilled": "Total facturé",
+  "totalPaid": "Total payé",
+  "invoicesCount": "Factures ({count})",
+  "@invoicesCount": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "noInvoiceYet": "Aucune facture. Elles sont générées depuis l'onglet Relevés.",
+  "paymentsCount": "Paiements ({count})",
+  "@paymentsCount": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "noPayment": "Aucun paiement enregistré.",
+  "initialTermEnd": "Fin de la période initiale",
+  "renewal": "Reconduction",
+  "renewalTacit": "Tacite",
+  "renewedTimes": "Tacite · reconduit {count} fois",
+  "@renewedTimes": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "no": "Non",
+  "nextDeadline": "Prochaine échéance",
+  "leaseExpired": "Bail échu : le locataire est toujours en place, à renouveler ou clôturer",
+  "closeLeaseQ": "Clôturer le contrat ?",
+  "closeLeaseHelp": "La facture de sortie sera créée, la caution imputée et l'appartement libéré. Cette action est définitive.",
+  "closeAction": "Clôturer",
+  "endOfLease": "Fin de contrat",
+  "placeSince": "{place} · depuis le {date}",
+  "@placeSince": {
+    "placeholders": {
+      "place": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "exit": "Sortie",
+  "exitDate": "Date de sortie",
+  "lastMonthProrata": "Dernier mois au prorata",
+  "lastMonthProrataOn": "Le locataire paie uniquement les jours occupés ({days} j).",
+  "@lastMonthProrataOn": {
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "lastMonthProrataOff": "Le locataire paie le mois complet.",
+  "exitReadings": "Index de sortie",
+  "lastBilledHint": "Dernier facturé : {value}",
+  "@lastBilledHint": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "indexRequired": "Index obligatoire",
+  "lowerThanLast": "Inférieur au dernier index ({value})",
+  "@lowerThanLast": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "inspectionAndDamages": "État des lieux et dégâts",
+  "roomByRoomOptional": "Détail pièce par pièce (facultatif)",
+  "totalDamages": "Montant total des dégâts",
+  "deductedFromDeposit": "Déduit de la caution de {amount}",
+  "@deductedFromDeposit": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "observations": "Observations",
+  "statement": "Décompte",
+  "exitInvoiceTotal": "Total facture de sortie",
+  "previousBalance": "Solde antérieur",
+  "tenantStillOwes": "Le locataire doit encore",
+  "accountSettled": "Compte soldé",
+  "depositInsufficient": "La caution est insuffisante : le reste sera à régler par le locataire.",
+  "computeStatement": "Calculer le décompte",
+  "closeLease": "Clôturer le contrat",
+  "noItem": "Aucun élément",
+  "exitInspectionHelp": "Ajoutez les dégâts constatés pièce par pièce, avec leur coût.",
+  "entryInspectionHelp": "Facultatif : décrivez l'état de chaque pièce à l'entrée.",
+  "damagesTotal": "Total des dégâts",
+  "item": "Élément",
+  "newItemInspection": "Nouvel élément",
+  "whichRoom": "1. Dans quelle pièce ?",
+  "chooseRoom": "Choisissez la pièce",
+  "otherRoom": "Autre pièce",
+  "whichItem": "2. Quel élément ?",
+  "entryWas": "{item} (entrée : {condition})",
+  "@entryWas": {
+    "placeholders": {
+      "item": {
+        "type": "String"
+      },
+      "condition": {
+        "type": "String"
+      }
+    }
+  },
+  "itemName": "Nom de l'élément constaté",
+  "itemNameHint": "ex. Climatiseur Samsung, porte d'entrée, lustre",
+  "conditionNoted": "3. État constaté",
+  "comment": "Commentaire",
+  "repairCost": "Coût de réparation",
+  "photo": "Photo",
+  "retake": "Reprendre",
+  "newRoom": "Nouvelle pièce",
+  "newRoomHint": "ex. Chambre parentale, buanderie",
+  "benefitApplied": "Appliqué",
+  "benefitUpcoming": "À venir",
+  "benefitSuspended": "Suspendu",
+  "leaseStart": "Début du bail",
+  "noLimit": "sans limite",
+  "benefits": "Avantages",
+  "noBenefit": "Aucun avantage. Exemple : employé ENEO exonéré d'électricité.",
+  "suspendFrom": "Suspendre à partir de…",
+  "resumeFrom": "Reprendre à partir de…",
+  "benefitSuspendedFrom": "Avantage suspendu à partir de {month}",
+  "@benefitSuspendedFrom": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "benefitResumedFrom": "Avantage repris à partir de {month}",
+  "@benefitResumedFrom": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteBenefitQ": "Supprimer l'avantage ?",
+  "deleteBenefitHelp": "Les factures verrouillées ne changent pas. Les factures modifiables seront à recalculer.",
+  "reasonEneo": "Employé ENEO",
+  "reasonCamwater": "Employé CAMWATER",
+  "reasonOwner": "Accord du propriétaire",
+  "reasonGoodwill": "Geste commercial",
+  "reasonCaretaker": "Gardien de l'immeuble",
+  "newBenefit": "Nouvel avantage",
+  "editBenefit": "Modifier l'avantage",
+  "chargeRequired": "Charge concernée *",
+  "chooseCharge": "Choisissez la charge",
+  "units": "Unités",
+  "amount": "Montant",
+  "percentHelp": "Pourcentage de la charge offert (100 % = exonération totale).",
+  "unitsHelp": "Nombre d'unités offertes chaque mois ; le surplus est facturé.",
+  "fixedHelp": "Montant déduit chaque mois de cette charge.",
+  "amountPerMonthOff": "Montant déduit par mois",
+  "percentage": "Pourcentage",
+  "freeUnitsPerMonth": "Unités gratuites par mois",
+  "valueInvalid": "Valeur invalide",
+  "max100": "100 % maximum",
+  "reason": "Motif",
+  "reasonHint": "ex. Employé ENEO",
+  "fromLabel": "Depuis : {value}",
+  "@fromLabel": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "toLabel": "Jusqu'à : {value}",
+  "@toLabel": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "leaseStartLower": "début du bail",
+  "noEndDate": "Sans date de fin",
+  "endAfterStart": "La fin doit être après le début.",
+  "benefitSaved": "Avantage enregistré. Recalculez les factures non verrouillées si besoin.",
+  "invoices": "Factures",
+  "payments": "Paiements",
+  "noInvoiceThisMonth": "Aucune facture ce mois-ci",
+  "noInvoiceThisMonthHelp": "Saisissez les relevés du mois puis générez les factures depuis l'onglet Relevés.",
+  "remaining": "Reste",
+  "filterAll": "Toutes",
+  "filterUnpaid": "Impayées",
+  "filterPaid": "Payées",
+  "downloadAllInvoices": "Télécharger toutes les factures (PDF)",
+  "invoicesOfMonth": "Factures {month}",
+  "@invoicesOfMonth": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "noPaymentThisMonth": "Aucun paiement ce mois-ci",
+  "totalCollected": "Total encaissé",
+  "overdue": "En retard",
+  "remainingAmount": "reste {amount}",
+  "@remainingAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "depositApplied": "Caution imputée",
+  "refundKind": "Remboursement",
+  "refundReceipt": "Reçu de remboursement",
+  "invoiceNotFound": "Facture introuvable",
+  "recalculate": "Recalculer",
+  "invoiceRecalculated": "Facture recalculée",
+  "recalculatedWarnings": "Recalculée · {count} avertissement(s)",
+  "@recalculatedWarnings": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteInvoiceQ": "Supprimer la facture ?",
+  "locked": "Verrouillée",
+  "editable": "Modifiable",
+  "remainingToPayAmount": "Reste à payer : {amount}",
+  "@remainingToPayAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "period": "Période",
+  "type": "Type",
+  "exitInvoice": "Facture de sortie",
+  "monthly": "Mensuelle",
+  "issuedOn": "Émise le",
+  "dueDate": "Échéance",
+  "detail": "Détail",
+  "ofWhichVat": "dont TVA",
+  "total": "Total",
+  "exitInvoiceFinal": "Facture de sortie : définitive.",
+  "laterMonthBilled": "Un mois ultérieur a été facturé : cette facture est définitive.",
+  "pdf": "PDF",
+  "collectPayment": "Encaisser un paiement",
+  "saveRefund": "Enregistrer le remboursement",
+  "savePayment": "Enregistrer le paiement",
+  "refundSaved": "Remboursement enregistré",
+  "paymentSaved": "Paiement enregistré",
+  "receiptNo": "Reçu n° {number}",
+  "@receiptNo": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "viewRefundReceipt": "Voir le reçu",
+  "viewReceipt": "Voir la quittance",
+  "balanceDue": "Solde dû",
+  "inTenantFavor": "En faveur du locataire",
+  "amountReceived": "Montant reçu",
+  "paymentDate": "Date du paiement",
+  "referenceHint": "Référence (transaction, chèque…)",
+  "invoicesFor": "Factures de {month}",
+  "@invoicesFor": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "generationSummary": "{created} créée(s), {updated} mise(s) à jour.",
+  "@generationSummary": {
+    "placeholders": {
+      "created": {
+        "type": "String"
+      },
+      "updated": {
+        "type": "String"
+      }
+    }
+  },
+  "generationSummaryLocked": "{created} créée(s), {updated} mise(s) à jour, {locked} verrouillée(s) non modifiée(s).",
+  "@generationSummaryLocked": {
+    "placeholders": {
+      "created": {
+        "type": "String"
+      },
+      "updated": {
+        "type": "String"
+      },
+      "locked": {
+        "type": "String"
+      }
+    }
+  },
+  "warnings": "Avertissements :",
+  "viewInvoices": "Voir les factures",
+  "exportMonthReadings": "Exporter les relevés du mois",
+  "noMeter": "Aucun compteur",
+  "noMeterHelp": "Ajoutez des compteurs aux appartements (onglet Biens) pour saisir les relevés.",
+  "metersRead": "compteurs relevés",
+  "photosCount": "{count} photo(s)",
+  "@photosCount": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "generateInvoices": "Générer les factures",
+  "previousValue": "Précédent : {value}",
+  "@previousValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "noPhoto": "Sans photo",
+  "previous": "Précédent",
+  "readingLocked": "Un relevé plus récent existe : ce relevé est verrouillé.",
+  "newReading": "Nouvel index",
+  "readingLowerThanPrevious": "Index inférieur au précédent",
+  "anomalyHelp": "⚠ Consommation plus de 2× supérieure à la moyenne ({average})",
+  "@anomalyHelp": {
+    "placeholders": {
+      "average": {
+        "type": "String"
+      }
+    }
+  },
+  "photographMeter": "Photographier le compteur",
+  "retakePhoto": "Reprendre la photo",
+  "readingDate": "Date du relevé",
+  "noPhotoTitle": "Aucune photo",
+  "saveWithoutPhoto": "Enregistrer ce relevé sans photo du compteur ?",
+  "restoreQ": "Restaurer cette sauvegarde ?",
+  "restoreHelp": "Toutes les données actuelles seront remplacées. Une sauvegarde de sécurité de l'état actuel est créée automatiquement avant.",
+  "restore": "Restaurer",
+  "backup": "Sauvegarde",
+  "backupHelp": "Toutes les données restent sur ce téléphone. Créez régulièrement une sauvegarde et envoyez-la ailleurs (Drive, e-mail, WhatsApp, clé USB) : en cas de perte du téléphone, c'est votre seule copie.",
+  "backupShareText": "Sauvegarde NHimmo",
+  "createShareBackup": "Créer et partager une sauvegarde",
+  "chooseBackupFile": "Choisir une sauvegarde NHimmo (.zip)",
+  "restoreFromFile": "Restaurer depuis un fichier",
+  "localBackups": "Sauvegardes sur ce téléphone",
+  "noLocalBackup": "Aucune sauvegarde locale.",
+  "sizeKb": "{size} Ko",
+  "@sizeKb": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "share": "Partager",
+  "meterTypes": "Types de compteurs",
+  "meterTypesHelp": "Un seul calcul pour tous : consommation × prix unitaire + entretien, TVA selon le mode choisi. Pour fournir du gaz, ajoutez simplement un type « Gaz ».",
+  "inactive": "Inactif",
+  "pricePerUnit": "{price} / {unit}",
+  "@pricePerUnit": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "maintenanceShort": "entretien {amount}",
+  "@maintenanceShort": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "withRate": "{mode} ({rate} %)",
+  "@withRate": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "newType": "Nouveau type",
+  "newMeterType": "Nouveau type de compteur",
+  "name": "Nom",
+  "gasHint": "ex. Gaz",
+  "unitOfMeasure": "Unité de mesure",
+  "unitHint": "ex. m³, kWh",
+  "tariff": "Tarif",
+  "unitPrice": "Prix par unité",
+  "meterFee": "Entretien / location compteur (par mois)",
+  "vat": "TVA",
+  "vatNoneShort": "Aucune",
+  "vatIncludedCap": "Incluse",
+  "vatAddedCap": "En sus",
+  "vatRate": "Taux de TVA",
+  "rateRequired": "Taux obligatoire",
+  "vatOnFee": "TVA aussi sur l'entretien",
+  "simulation": "Simulation",
+  "excludingTax": "Hors taxe",
+  "totalCharged": "Total facturé",
+  "active": "Actif",
+  "inactiveTypeHelp": "Un type inactif n'est plus proposé.",
+  "translations": "Traductions",
+  "translationsHelp": "Nom affiché sur les documents des locataires de chaque langue (vide = nom principal).",
+  "nameIn": "Nom ({lang})",
+  "@nameIn": {
+    "placeholders": {
+      "lang": {
+        "type": "String"
+      }
+    }
+  },
+  "unitIn": "Unité ({lang})",
+  "@unitIn": {
+    "placeholders": {
+      "lang": {
+        "type": "String"
+      }
+    }
+  },
+  "noService": "Aucun service",
+  "servicePriceLine": "{price} par {unit} et par mois",
+  "@servicePriceLine": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "newService": "Nouveau service",
+  "defaultUnit": "unité",
+  "parkingHint": "ex. Parking",
+  "unit": "Unité",
+  "serviceUnitHint": "ex. véhicule, place",
+  "monthlyPricePerUnit": "Prix mensuel par unité",
+  "scopeReadings": "Relevés",
+  "scopeReadingsHelp": "Index, consommations, photos (oui/non), par mois ou période",
+  "scopeBilling": "Facturation",
+  "scopeBillingHelp": "Factures, lignes détaillées, paiements, soldes",
+  "scopeAll": "Toutes les données",
+  "scopeAllHelp": "Toutes les tables de l'application",
+  "exports": "Exports",
+  "whatToExport": "Que voulez-vous exporter ?",
+  "thisMonth": "Ce mois",
+  "last3Months": "3 derniers mois",
+  "thisYear": "Cette année",
+  "format": "Format",
+  "fullBackupZip": "Sauvegarde complète (ZIP)",
+  "fullBackupHelp": "Base + photos, réimportable dans l'application",
+  "exportAndShare": "Exporter et partager",
+  "fromMonth": "Du {month}",
+  "@fromMonth": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "toMonth": "Au {month}",
+  "@toMonth": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "general": "Général",
+  "generalHelp": "Nom, coordonnées, langue, devise, échéance",
+  "meterTypesTileHelp": "Eau, électricité, gaz… prix, entretien, TVA",
+  "servicesTileHelp": "Parking, gardiennage…",
+  "exportsTileHelp": "Relevés, facturation, toutes les données",
+  "backupRestore": "Sauvegarde et restauration",
+  "backupRestoreHelp": "Fichier ZIP complet (données + photos)",
+  "demoLoaded": "Données de démonstration chargées",
+  "loadDemo": "Charger des données de démonstration",
+  "loadDemoHelp": "Pour découvrir l'application (visible seulement si elle est vide)",
+  "signatureKey": "Clé de signature des documents : {key}",
+  "@signatureKey": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "managerHeader": "Gestionnaire (en-tête des documents)",
+  "businessName": "Nom / raison sociale",
+  "invoiceFooter": "Mention en bas des factures",
+  "currency": "Devise",
+  "customSymbol": "Symbole affiché (devise personnalisée)",
+  "symbolBefore": "Symbole avant le montant",
+  "preview": "Aperçu : {value}",
+  "@preview": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "billing": "Facturation",
+  "invoiceDueDay": "Jour d'échéance des factures",
+  "scanTitle": "Scanner un document",
+  "scanHelp": "Visez le QR code d'une facture, d'une quittance ou d'un décompte de sortie imprimé.",
+  "docWithNumber": "{doc} {number}",
+  "@docWithNumber": {
+    "placeholders": {
+      "doc": {
+        "type": "String"
+      },
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "balanceAtPrint": "Solde au moment de l'impression : {amount}",
+  "@balanceAtPrint": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "result": "Résultat",
+  "qrUnknown": "QR code non reconnu",
+  "qrUnknownHelp": "Ce QR code ne provient pas d'un document NHimmo.",
+  "verification": "Vérification",
+  "signatureInvalid": "Signature invalide",
+  "signatureValid": "Signature valide",
+  "documentAuthentic": "Document authentique",
+  "documentChanged": "Document modifié depuis l'impression",
+  "signatureInvalidHelp": "Ce document a été falsifié ou n'a pas été émis par cette application.",
+  "signatureValidHelp": "Le document a bien été émis avec votre clé, mais il n'existe plus dans les données.",
+  "documentAuthenticHelp": "Les informations imprimées correspondent aux données enregistrées.",
+  "documentChangedHelp": "Le document a été régénéré depuis : ouvrez-le pour voir la version actuelle.",
+  "numberLabel": "Numéro",
+  "openDocument": "Ouvrir le document",
+  "scanAnother": "Scanner un autre document",
+  "pdfNumber": "N° {number}",
+  "@pdfNumber": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "pdfDigitalSignature": "Signature numérique",
+  "pdfDesignation": "Désignation",
+  "pdfExclTax": "HT",
+  "pdfAmount": "Montant",
+  "pdfFooter": "Document signé numériquement, vérifiable par QR code dans NHimmo",
+  "pdfPage": "Page {page}/{total}",
+  "@pdfPage": {
+    "placeholders": {
+      "page": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "pdfDefaultThanks": "Merci pour votre règlement.",
+  "pdfPeriod": "Période : {period}",
+  "@pdfPeriod": {
+    "placeholders": {
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "pdfIssuedDue": "Émise le {issued}  ·  Échéance {due}",
+  "@pdfIssuedDue": {
+    "placeholders": {
+      "issued": {
+        "type": "String"
+      },
+      "due": {
+        "type": "String"
+      }
+    }
+  },
+  "pdfLandlord": "Bailleur / gestionnaire",
+  "pdfTenant": "Locataire",
+  "pdfTotalExclTax": "Total HT",
+  "pdfTotalDue": "Total à payer",
+  "pdfStatus": "Statut",
+  "pdfPaidStamp": "PAYÉE",
+  "pdfNotes": "Notes : {notes}",
+  "@pdfNotes": {
+    "placeholders": {
+      "notes": {
+        "type": "String"
+      }
+    }
+  },
+  "pdfDate": "Date : {date}",
+  "@pdfDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "pdfRefundText": "Le gestionnaire {manager} a remboursé à {tenant} la somme de :",
+  "@pdfRefundText": {
+    "placeholders": {
+      "manager": {
+        "type": "String"
+      },
+      "tenant": {
+        "type": "String"
+      }
+    }
+  },
+  "pdfReceivedText": "Reçu de {tenant}, locataire de {place}, la somme de :",
+  "@pdfReceivedText": {
+    "placeholders": {
+      "tenant": {
+        "type": "String"
+      },
+      "place": {
+        "type": "String"
+      }
+    }
+  },
+  "pdfPaymentMethod": "Mode de règlement : {method}",
+  "@pdfPaymentMethod": {
+    "placeholders": {
+      "method": {
+        "type": "String"
+      }
+    }
+  },
+  "pdfReference": "réf. {ref}",
+  "@pdfReference": {
+    "placeholders": {
+      "ref": {
+        "type": "String"
+      }
+    }
+  },
+  "pdfNote": "Note : {note}",
+  "@pdfNote": {
+    "placeholders": {
+      "note": {
+        "type": "String"
+      }
+    }
+  },
+  "pdfBalanceAfter": "Solde du compte locataire après ce règlement : {amount}",
+  "@pdfBalanceAfter": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "pdfDoneOn": "Fait le {date}",
+  "@pdfDoneOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "pdfExitTitle": "Décompte de fin de contrat",
+  "pdfMoveInOut": "Entrée : {moveIn}  ·  Sortie : {moveOut}",
+  "@pdfMoveInOut": {
+    "placeholders": {
+      "moveIn": {
+        "type": "String"
+      },
+      "moveOut": {
+        "type": "String"
+      }
+    }
+  },
+  "pdfLastMonthProrata": "Dernier mois : au prorata des jours",
+  "pdfLastMonthFull": "Dernier mois : mois complet",
+  "pdfOutgoingTenant": "Locataire sortant",
+  "pdfSectionExitInvoice": "1. Facture de sortie",
+  "pdfNoLine": "Aucune ligne.",
+  "pdfSectionDamages": "2. Détail des dégâts constatés",
+  "pdfRoom": "Pièce",
+  "pdfItem": "Élément",
+  "pdfCondition": "État",
+  "pdfComment": "Commentaire",
+  "pdfCost": "Coût",
+  "pdfSectionSummary": "{n}. Récapitulatif du compte",
+  "@pdfSectionSummary": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "pdfTotalLease": "Total facturé sur toute la durée du contrat",
+  "pdfTotalTenantPaid": "Total réglé par le locataire",
+  "pdfDepositApplied": "Caution versée à l'entrée (imputée)",
+  "pdfDamagesFromDeposit": "dont dégâts retenus sur la caution",
+  "pdfRefundsDone": "Remboursements déjà effectués",
+  "pdfTenantOwes": "Reste à payer par le locataire",
+  "pdfToRefund": "À rembourser au locataire",
+  "pdfSettled": "Compte soldé",
+  "pdfDepositNotEnough": "La caution ne couvre pas la totalité des sommes dues : le locataire doit compléter le montant ci-dessus.",
+  "pdfObservations": "Observations : {notes}",
+  "@pdfObservations": {
+    "placeholders": {
+      "notes": {
+        "type": "String"
+      }
+    }
+  },
+  "pdfManagerSign": "Le gestionnaire",
+  "pdfTenantSign": "Le locataire (lu et approuvé)",
+  "xBuilding": "Immeuble",
+  "xApartment": "Appartement",
+  "xMeter": "Compteur",
+  "xReading": "Index",
+  "xPreviousReading": "Index précédent",
+  "xYes": "oui",
+  "xNo": "non",
+  "xKindMonthly": "Mensuel",
+  "xInvoiceNo": "N° facture",
+  "xTotalWith": "Total ({symbol})",
+  "@xTotalWith": {
+    "placeholders": {
+      "symbol": {
+        "type": "String"
+      }
+    }
+  },
+  "xLabel": "Libellé",
+  "xDetails": "Détails",
+  "xQuantity": "Quantité",
+  "xUnitPrice": "Prix unitaire",
+  "xInclTax": "TTC",
+  "xStartReading": "Index début",
+  "xEndReading": "Index fin",
+  "xReceiptNo": "N° reçu",
+  "xMethod": "Mode",
+  "xReference": "Référence",
+  "xPayment": "Paiement",
+  "xBalanceSigned": "Solde (+ dû / − à rembourser)",
+  "xSheetLines": "Lignes",
+  "xSheetBalances": "Soldes",
+  "backupNotMyImmo": "Ce fichier n'est pas une sauvegarde NHimmo.",
+  "backupUnknownFormat": "Format de sauvegarde inconnu.",
+  "backupTooRecent": "Sauvegarde créée par une version plus récente de l'application.",
+  "editPayment": "Modifier le versement",
+  "completeDeposit": "Compléter la caution",
+  "paymentUpdated": "Versement modifié",
+  "depositMissing": "Reste à verser",
+  "depositAmountReceived": "Montant de caution reçu",
+  "depositReceived": "Caution reçue",
+  "deletePaymentQ": "Supprimer ce versement ?",
+  "deletePaymentHelp": "Le versement {number} sera supprimé et le solde du locataire recalculé.",
+  "@deletePaymentHelp": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentDeleted": "Versement supprimé",
+  "paymentLockedHelp": "Un versement plus récent existe : seul le dernier versement peut être modifié ou supprimé.",
+  "paymentAutoLocked": "Caution imputée automatiquement à la clôture du contrat : non modifiable.",
+  "depositIncomplete": "Caution incomplète",
+  "depositIncompleteShort": "Caution incomplète",
+  "depositIncompleteDetail": "Caution versée : {paid} sur {required}",
+  "@depositIncompleteDetail": {
+    "placeholders": {
+      "paid": {
+        "type": "String"
+      },
+      "required": {
+        "type": "String"
+      }
+    }
+  },
+  "depositMissingAmount": "Reste à verser : {amount}",
+  "@depositMissingAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "complete": "Compléter",
+  "incompleteDeposits": "Cautions incomplètes",
+  "creditSettlement": "Règlement par avance",
+  "creditAvailable": "Avance / paiements disponibles",
+  "creditApplied": "Déduit de l'avance",
+  "creditRemaining": "Avance restante après cette facture",
+  "depositReceipt": "Reçu de caution",
+  "pdfDepositReceivedText": "Reçu de {tenant}, locataire de {place}, au titre de la caution, la somme de :",
+  "@pdfDepositReceivedText": {
+    "placeholders": {
+      "tenant": {
+        "type": "String"
+      },
+      "place": {
+        "type": "String"
+      }
+    }
+  }
+}

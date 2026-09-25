@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{%- from "_icons.html" import icon -%}
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <nav class="crumbs" aria-label="breadcrumb"><a href="{{ r.home }}">{{ t.nav.home }}</a> › {{ t.nav.download }}</nav>
+    <h1>{{ t.download.h1 }}</h1>
+    <p>{{ t.download.lead }}</p>
+  </div>
+</section>
+
+<div class="page-body">
+  <div class="container">
+    <div class="dl-grid">
+      <div class="card dl-card" id="dl">
+        <img class="app-icon" src="/assets/img/icon-192.png" width="96" height="96" alt="{{ cfg.appName }}">
+        <h2>{{ cfg.appName }}</h2>
+        <p class="dl-meta" id="dl-meta">
+          {%- if latest %}{{ t.common.version }} <strong>{{ latest.version }}</strong> · {{ latest.date_display }} · {{ t.common.android_only }}{% else %}{{ t.common.android_only }}{% endif -%}
+        </p>
+
+        <div class="notice hidden" id="dl-ios"><strong>{{ t.download.ios_title }}</strong><br>{{ t.download.ios_text }} <a href="{{ r.contact }}">{{ t.nav.contact }}</a></div>
+        <div class="notice err hidden" id="dl-error">{{ t.download.unavailable }}</div>
+
+        <div class="hidden" id="dl-desktop">
+          <h3>{{ t.download.desktop_title }}</h3>
+          <p class="muted">{{ t.download.desktop_text }}</p>
+          <div class="qr"><img src="{{ qr_src }}" width="164" height="164" alt="QR code : {{ page.url }}"></div>
+          <p class="muted">{{ t.download.desktop_or }}</p>
+        </div>
+
+        <a class="btn btn-gold" id="dl-btn" href="{{ latest.files.universal.url if latest and latest.files.universal else '#' }}" download
+           {%- if latest and latest.files.universal %} data-size="{{ latest.files.universal.size }}"{% endif %}>
+          {{ icon('download') }}<span>{{ t.download.button }}</span><span id="dl-size">{% if latest and latest.files.universal %}({{ latest.files.universal.size_display }}){% endif %}</span>
+        </a>
+        <p class="dl-hint" id="dl-hint">{{ icon('check') }}<span>{{ t.download.recommended_universal }}</span></p>
+        <p class="muted mt" style="font-size:.9rem">{{ t.download.update_note }}</p>
+      </div>
+
+      <div>
+        <div class="card howto">
+          <h2 style="font-size:1.25rem">{{ t.download.howto_title }}</h2>
+          <ol>{% for s in t.download.howto %}<li>{{ s }}</li>{% endfor %}</ol>
+        </div>
+        <div class="card whatsnew mt" id="dl-notes">
+          <h2 style="font-size:1.25rem">{{ t.download.whats_new }}</h2>
+          {%- if latest %}
+          {%- if latest.notes.summary %}<p class="muted">{{ latest.notes.summary }}</p>{% endif %}
+          <ul>{% for item in (latest.notes.added + latest.notes.improved + latest.notes.fixed)[:6] %}<li>{{ item }}</li>{% endfor %}</ul>
+          {%- endif %}
+          <p class="mt" style="margin-bottom:0"><a href="{{ r.versions }}">{{ t.download.all_versions }} →</a></p>
+        </div>
+      </div>
+    </div>
+
+    <details class="advanced" id="advanced">
+      <summary>{{ t.download.advanced_title }}</summary>
+      <p class="muted">{{ t.download.advanced_text }}</p>
+      <div class="table-wrap">
+        <table class="variants">
+          <thead><tr><th>{{ t.download.col_variant }}</th><th>{{ t.download.col_for }}</th><th>{{ t.download.col_req }}</th><th>{{ t.download.col_size }}</th><th>{{ t.download.col_file }}</th></tr></thead>
+          <tbody id="variants">
+            {%- for key in ['universal', 'arm64', 'armv7', 'x86_64'] %}
+            {%- set f = latest.files[key] if latest and latest.files[key] else none %}
+            <tr data-variant="{{ key }}"{% if not f %} class="hidden"{% endif %}>
+              <td><strong>{{ t.download.variants[key].name }}</strong><span class="rec hidden">✓</span></td>
+              <td>{{ t.download.variants[key].for }}</td>
+              <td>{{ t.download.variants[key].req }}{% if f and f.sha256 %}<br><code title="{{ t.download.sha }}">SHA-256 : {{ f.sha256 }}</code>{% endif %}</td>
+              <td class="size">{{ f.size_display if f else '' }}</td>
+              <td><a class="btn btn-navy btn-small" href="{{ f.url if f else '#' }}" download>{{ icon('download') }}.apk</a></td>
+            </tr>
+            {%- endfor %}
+          </tbody>
+        </table>
+      </div>
+      <h3 class="mt">{{ t.download.how_detect }}</h3>
+      <p class="muted">{{ t.download.how_detect_text }}</p>
+    </details>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+  <script type="module" src="{{ asset('js/releases.js') }}"></script>
+{%- endblock %}
