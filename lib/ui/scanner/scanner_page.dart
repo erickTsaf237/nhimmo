@@ -107,7 +107,7 @@ class _ResultPage extends StatelessWidget {
         final pay = await (db.select(db.payments)..where((x) => x.id.equals(p.id))).getSingleOrNull();
         return _Check(ok, pay != null, pay != null && pay.receiptNumber == p.number && pay.amount == p.amount,
             p.number, Money.format(p.amount));
-      case DocType.exit:
+      case DocType.exit || DocType.signing:
         final c = await (db.select(db.contracts)..where((x) => x.id.equals(p.id))).getSingleOrNull();
         return _Check(ok, c != null, c != null, p.number, Money.format(p.amount));
     }
@@ -171,6 +171,7 @@ class _ResultPage extends StatelessWidget {
                     DocType.invoice => context.t.docInvoice,
                     DocType.receipt => context.t.docReceipt,
                     DocType.exit => context.t.docExit,
+                    DocType.signing => context.t.signSlip,
                   }),
                   InfoRow(context.t.numberLabel, p.number),
                   InfoRow(context.t.amount, Money.format(p.amount), strong: true),
@@ -185,7 +186,7 @@ class _ResultPage extends StatelessWidget {
                         push(context, InvoiceDetailPage(p.id));
                       case DocType.receipt:
                         openPdf(context, context.t.docReceipt, '${p.number}.pdf', () => PdfService.receipt(p.id));
-                      case DocType.exit:
+                      case DocType.exit || DocType.signing:
                         push(context, ContractDetailPage(p.id));
                     }
                   },

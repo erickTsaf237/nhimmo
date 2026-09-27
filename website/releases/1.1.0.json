@@ -1,0 +1,65 @@
+{
+  "version": "1.1.0",
+  "build": 3,
+  "date": "2026-09-27",
+  "published": true,
+  "minAndroid": "7.0",
+  "notes": {
+    "fr": {
+      "summary": "Pénalités de retard, historique des loyers et des tarifs, fiche historique, premier loyer à la signature et bordereau de signature.",
+      "added": [
+        "Pénalité de retard : une case à cocher à l'encaissement ajoute la pénalité (montant de l'immeuble par défaut, modifiable par appartement) et recalcule le montant attendu.",
+        "Historique des loyers : un nouveau loyer s'applique à partir du mois choisi, sans modifier les anciennes factures.",
+        "Historique des tarifs d'eau, d'électricité… : chaque mois est facturé au tarif en vigueur ce mois-là.",
+        "Fiche historique (PDF) de chaque bail : index, loyer, pénalité, montant attendu, payé et date de règlement, mois par mois.",
+        "Premier loyer payé à la signature : au prorata, mois complet ou montant forfaitaire avec commentaire ; la facture d'entrée est créée à la signature.",
+        "Bordereau de signature (PDF) à remettre au locataire : conditions convenues, index d'entrée, montant à régler, signatures et QR code vérifiable."
+      ],
+      "improved": [
+        "Date limite de paiement fixée par défaut au 10 de chaque mois (sauf le mois d'entrée, payable à la signature)."
+      ],
+      "fixed": [
+        "Les données de démonstration ne sont plus chargées deux fois en cas de double appui."
+      ]
+    },
+    "en": {
+      "summary": "Late penalties, rent and tariff history, history sheet, first rent at signing and signing slip.",
+      "added": [
+        "Late payment penalty: a checkbox when recording a payment adds the penalty (building amount by default, adjustable per apartment) and recomputes the expected amount.",
+        "Rent history: a new rent applies from the chosen month without changing past invoices.",
+        "Water, electricity… tariff history: each month is billed at the tariff in force that month.",
+        "History sheet (PDF) for each lease: readings, rent, penalty, expected amount, paid amount and settlement date, month by month.",
+        "First rent paid at signing: prorated, full month or flat amount with a comment; the move-in invoice is created at signing.",
+        "Signing slip (PDF) to hand to the tenant: agreed terms, move-in readings, amount due, signatures and a verifiable QR code."
+      ],
+      "improved": [
+        "Payment due date now defaults to the 10th of each month (except the move-in month, due at signing)."
+      ],
+      "fixed": [
+        "Demo data is no longer loaded twice on a double tap."
+      ]
+    }
+  },
+  "files": {
+    "universal": {
+      "path": "releases/1.1.0/nhimmo-1.1.0-universal.apk",
+      "size": 88749433,
+      "sha256": "18fb397f28194ecc7478ea4d0b3719f1d162648a6d117a172e90ac49cd958445"
+    },
+    "arm64": {
+      "path": "releases/1.1.0/nhimmo-1.1.0-arm64.apk",
+      "size": 31961402,
+      "sha256": "c7133ea883fcb3205d78850a5bd1d8522913b296966053760510704617680343"
+    },
+    "armv7": {
+      "path": "releases/1.1.0/nhimmo-1.1.0-armv7.apk",
+      "size": 28601260,
+      "sha256": "2417c2f93d704dcd9ed7ec6abc82638bc73e28dc039f07296eb4a7a31ca9120f"
+    },
+    "x86_64": {
+      "path": "releases/1.1.0/nhimmo-1.1.0-x86_64.apk",
+      "size": 34435385,
+      "sha256": "1dc3f1ccd87a5cb326d720fe331e0142b79c3b008ace0f1c2eeefce856f0c75a"
+    }
+  }
+}

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../core/dates.dart';
@@ -47,6 +49,39 @@ class _PaymentFormState extends State<PaymentForm> {
   late final _note = TextEditingController(text: p?.note);
   late bool _prefilled = p != null;
 
+  // ---- pénalité de retard (nouvel encaissement uniquement)
+  bool _penaltyOn = false;
+  final _penalty = TextEditingController();
+  bool _computing = false;
+  Timer? _debounce;
+
+  /// Nouveau total attendu (solde + pénalité), affiché après le calcul.
+  int? _expected;
+
+  bool get _canPenalize => p == null && _kind == PaymentKind.payment;
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    super.dispose();
+  }
+
+  /// Recalcul du montant attendu : un court délai (0,5 s) avec indicateur visuel.
+  void _recompute(ContractView cv) {
+    _debounce?.cancel();
+    setState(() => _computing = true);
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      if (!mounted) return;
+      final pen = _penaltyOn ? (Money.parse(_penalty.text) ?? 0) : 0;
+      final due = cv.balance + pen;
+      setState(() {
+        _computing = false;
+        _expected = _penaltyOn ? due : null;
+        if (due > 0) _amount.text = Money.toInput(due);
+      });
+    });
+  }
+
   bool get _refund => _kind == PaymentKind.refund;
   bool get _deposit => _kind == PaymentKind.depositReceived;
 
@@ -76,16 +111,30 @@ class _PaymentFormState extends State<PaymentForm> {
           formKey: _key,
           saveLabel: p != null ? t.save : _refund ? t.saveRefund : t.savePayment,
           onSave: () async {
-            final id = await PaymentService.save(
-              existing: p,
-              contractId: _contractId!,
-              kind: _kind,
-              date: _date,
-              amount: Money.parse(_amount.text)!,
-              method: _method,
-              reference: emptyToNull(_reference.text),
-              note: emptyToNull(_note.text),
-            );
+            if (_computing) return;
+            final penalty = _penaltyOn ? (Money.parse(_penalty.text) ?? 0) : 0;
+            final id = _penaltyOn && cv != null
+                ? await PaymentService.saveWithPenalty(
+                    apartment: cv.apt,
+                    building: cv.building,
+                    contractId: _contractId!,
+                    penalty: penalty,
+                    date: _date,
+                    amount: Money.parse(_amount.text)!,
+                    method: _method,
+                    reference: emptyToNull(_reference.text),
+                    note: emptyToNull(_note.text),
+                  )
+                : await PaymentService.save(
+                    existing: p,
+                    contractId: _contractId!,
+                    kind: _kind,
+                    date: _date,
+                    amount: Money.parse(_amount.text)!,
+                    method: _method,
+                    reference: emptyToNull(_reference.text),
+                    note: emptyToNull(_note.text),
+                  );
             if (!context.mounted) return;
             if (p != null) {
               toast(context, context.t.paymentUpdated);
@@ -136,6 +185,8 @@ class _PaymentFormState extends State<PaymentForm> {
                           _contractId = v;
                           _prefilled = false;
                           _amount.clear();
+                          _penaltyOn = false;
+                          _expected = null;
                         }),
                 validator: (v) => v == null ? t.chooseTenant : null,
               ),
@@ -165,6 +216,52 @@ class _PaymentFormState extends State<PaymentForm> {
                   ),
                 ),
               ),
+            if (cv != null && _canPenalize) ...[
+              SwitchRow(
+                title: t.latePenalty,
+                subtitle: t.latePenaltyHelp,
+                value: _penaltyOn,
+                onChanged: (v) {
+                  setState(() {
+                    _penaltyOn = v;
+                    if (v && _penalty.text.isEmpty) {
+                      _penalty.text = Money.toInput(PaymentService.defaultPenalty(cv.apt, cv.building));
+                    }
+                  });
+                  _recompute(cv);
+                },
+              ),
+              if (_penaltyOn) ...[
+                AmountField(_penalty, t.latePenaltyAmount, helper: t.latePenaltyScope, onChanged: (_) => _recompute(cv)),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 14),
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 200),
+                    child: _computing
+                        ? AppCard(
+                            key: const ValueKey('computing'),
+                            child: Row(children: [
+                              const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2.5)),
+                              const SizedBox(width: 14),
+                              Expanded(child: Text(t.recomputingExpected)),
+                            ]),
+                          )
+                        : _expected == null
+                            ? const SizedBox.shrink()
+                            : AppCard(
+                                key: const ValueKey('expected'),
+                                color: AppColors.warning.withValues(alpha: .10),
+                                child: Column(children: [
+                                  InfoRow(t.balanceDue, Money.format(cv.balance)),
+                                  InfoRow(t.latePenalty, '+ ${Money.format(Money.parse(_penalty.text) ?? 0)}', color: AppColors.danger),
+                                  const Divider(height: 16),
+                                  InfoRow(t.newExpectedTotal, Money.format(_expected!), strong: true, color: AppColors.danger),
+                                ]),
+                              ),
+                  ),
+                ),
+              ],
+            ],
             AmountField(_amount, _deposit ? t.depositAmountReceived : t.amountReceived),
             DateField(label: t.paymentDate, value: _date, onChanged: (v) => setState(() => _date = v)),
             Wrap(spacing: 8, runSpacing: 8, children: [

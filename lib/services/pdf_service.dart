@@ -11,6 +11,7 @@ import '../data/database.dart';
 import '../data/repo.dart';
 import '../l10n/app_localizations.dart';
 import 'app_state.dart';
+import 'history_sheet.dart';
 import 'signature_service.dart';
 
 /// Langue d'un document : celle du locataire, sinon celle de l'application.
@@ -410,6 +411,259 @@ class PdfService {
           pw.Text(t.pdfManagerSign, style: const pw.TextStyle(fontSize: 10)),
           pw.Text(t.pdfTenantSign, style: const pw.TextStyle(fontSize: 10)),
         ]),
+      ],
+    ));
+    return doc.save();
+  }
+  // ------------------------------------------------------------ bordereau de signature
+
+  /// Bordereau remis au locataire à la signature : trace des conditions convenues
+  /// (le bail lui-même n'est pas rédigé dans l'application).
+  static Future<Uint8List> signingSlip(int contractId) async {
+    final doc = await _doc();
+    final db = App.db;
+    final cv = await Repo.contract(contractId);
+    final l = await _Lang.forTenant(cv.tenant);
+    final t = l.t;
+    final c = cv.c;
+    final number = 'B-${c.id.toString().padLeft(4, '0')}';
+    final qr = await SignatureService.qrData(DocType.signing, c.id, number, c.rent);
+
+    final svcTypes = {for (final s in await db.select(db.serviceTypes).get()) s.id: s};
+    final services = await (db.select(db.contractServices)..where((s) => s.contractId.equals(c.id))).get();
+    final meters = {for (final m in await Repo.activeMeters(apartmentId: c.apartmentId)) m.meter.id: m};
+    final readings = await (db.select(db.readings)
+          ..where((r) => r.contractId.equals(c.id) & r.kind.equals(1)))
+        .get();
+    final entryInv = (await Repo.invoices(period: Period.of(c.startDate), contractId: c.id))
+        .where((i) => i.inv.kind == 0)
+        .firstOrNull;
+    final depositLeft = c.deposit > c.depositPaid ? c.deposit - c.depositPaid : 0;
+    final penalty = cv.apt.latePenalty ?? cv.building.latePenalty;
+
+    final firstRent = switch (c.firstRentMode) {
+      1 => t.fullMonth,
+      2 => '${t.firstRentFlat} · ${l.money(c.firstRentAmount ?? 0)}${c.firstRentNote == null ? '' : ' (${c.firstRentNote})'}',
+      _ => t.prorated,
+    };
+
+    pw.Widget row(String k, String v) => pw.Padding(
+          padding: const pw.EdgeInsets.symmetric(vertical: 2.5),
+          child: pw.Row(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
+            pw.SizedBox(width: 190, child: pw.Text(k, style: const pw.TextStyle(fontSize: 10, color: _muted))),
+            pw.Expanded(child: pw.Text(v, style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold))),
+          ]),
+        );
+
+    pw.Widget table(List<String> headers, List<List<String>> data) => pw.TableHelper.fromTextArray(
+          headers: headers,
+          data: data,
+          border: null,
+          headerStyle: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold, color: PdfColors.white),
+          headerDecoration: const pw.BoxDecoration(color: _primary),
+          cellStyle: const pw.TextStyle(fontSize: 9),
+          cellAlignments: {for (var i = 1; i < headers.length; i++) i: pw.Alignment.centerRight},
+          cellAlignment: pw.Alignment.centerLeft,
+          headerAlignments: {for (var i = 0; i < headers.length; i++) i: i == 0 ? pw.Alignment.centerLeft : pw.Alignment.centerRight},
+          rowDecoration: const pw.BoxDecoration(
+              border: pw.Border(bottom: pw.BorderSide(color: PdfColors.grey300, width: .5))),
+        );
+
+    doc.addPage(pw.MultiPage(
+      pageFormat: PdfPageFormat.a4,
+      margin: const pw.EdgeInsets.all(32),
+      footer: _footer(l),
+      build: (ctx) => [
+        _header(l, t.signSlip, number, qr, [t.pdfDate(Dates.long(c.startDate, l.code))]),
+        pw.SizedBox(height: 16),
+        pw.Row(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
+          pw.Expanded(child: _landlord(l)),
+          pw.SizedBox(width: 12),
+          pw.Expanded(
+              child: _party(t.pdfTenant, [
+            cv.tenant.fullName,
+            if (cv.tenant.idNumber != null && cv.tenant.idNumber!.isNotEmpty) '${t.idNumber} : ${cv.tenant.idNumber}',
+            cv.tenant.phone ?? '',
+            cv.tenant.email ?? '',
+          ])),
+        ]),
+        pw.SizedBox(height: 14),
+        _sectionTitle(t.bsHousing),
+        pw.SizedBox(height: 4),
+        row(t.bsHousing, [cv.place, if (cv.apt.floor != null && cv.apt.floor!.isNotEmpty) cv.apt.floor!].join(' · ')),
+        if (cv.building.address != null && cv.building.address!.isNotEmpty) row(t.address, cv.building.address!),
+        pw.SizedBox(height: 12),
+        _sectionTitle(t.bsTerms),
+        pw.SizedBox(height: 4),
+        row(t.bsSigningDate, l.date(c.startDate)),
+        if (c.plannedEndDate != null) row(t.bsPlannedEnd, l.date(c.plannedEndDate)),
+        if (c.plannedEndDate != null && c.tacitRenewal) row(t.tacitRenewal, t.yes),
+        row(t.monthlyRent, l.money(c.rent)),
+        row(t.depositRequired, l.money(c.deposit)),
+        row(t.depositPaid, l.money(c.depositPaid)),
+        row(t.firstRent, firstRent),
+        if (penalty > 0) row(t.latePenalty, l.money(penalty)),
+        pw.Padding(
+          padding: const pw.EdgeInsets.only(top: 4),
+          child: pw.Text(t.bsDueRule('${App.settings.dueDay}'), style: const pw.TextStyle(fontSize: 9.5)),
+        ),
+        pw.SizedBox(height: 12),
+        _sectionTitle(t.services),
+        pw.SizedBox(height: 4),
+        if (services.isEmpty)
+          pw.Text(t.bsNoService, style: const pw.TextStyle(fontSize: 9.5, color: _muted))
+        else
+          table([t.services, t.unitPrice, t.pdfAmount], [
+            for (final s in services)
+              [
+                svcTypes[s.serviceTypeId] == null ? '' : Labels.serviceName(svcTypes[s.serviceTypeId]!, l.code),
+                l.money(s.unitPrice),
+                l.money(s.unitPrice * (s.quantity - s.includedQuantity).clamp(0, 1 << 30)),
+              ]
+          ]),
+        if (readings.isNotEmpty) ...[
+          pw.SizedBox(height: 12),
+          _sectionTitle(t.entryReadings),
+          pw.SizedBox(height: 4),
+          table([t.bsMeter, t.bsIndex], [
+            for (final r in readings)
+              [
+                meters[r.meterId] == null ? '' : Labels.utilityName(meters[r.meterId]!.type, l.code),
+                Num.format(r.value),
+              ]
+          ]),
+        ],
+        pw.SizedBox(height: 12),
+        _sectionTitle(t.bsAtSigning),
+        pw.SizedBox(height: 4),
+        if (entryInv != null) _totalRow(l, t.bsFirstInvoice(entryInv.inv.number), entryInv.inv.total),
+        if (depositLeft > 0) _totalRow(l, t.bsDepositLeft, depositLeft),
+        _totalRow(l, t.bsRemaining, (entryInv?.remaining ?? 0) + depositLeft, strong: true, color: _primary),
+        pw.SizedBox(height: 14),
+        pw.Text(t.bsDisclaimer, style: const pw.TextStyle(fontSize: 9, color: _muted)),
+        pw.SizedBox(height: 10),
+        pw.Text(t.pdfDoneOn(l.date(c.startDate)), style: const pw.TextStyle(fontSize: 10)),
+        pw.SizedBox(height: 30),
+        pw.Row(mainAxisAlignment: pw.MainAxisAlignment.spaceBetween, children: [
+          pw.Text(t.pdfManagerSign, style: const pw.TextStyle(fontSize: 10)),
+          pw.Text(t.pdfTenantSign, style: const pw.TextStyle(fontSize: 10)),
+        ]),
+        pw.SizedBox(height: 50),
+      ],
+    ));
+    return doc.save();
+  }
+
+  // ------------------------------------------------------------ fiche historique
+
+  /// Fiche historique d'un bail, au format du cahier : un mois par ligne avec index, montants,
+  /// loyer, pénalité, montant attendu, montant payé et date de règlement.
+  static Future<Uint8List> historySheet(int contractId) async {
+    final doc = await _doc();
+    final sheet = await HistorySheet.build(contractId);
+    final cv = sheet.cv;
+    final l = await _Lang.forTenant(cv.tenant);
+    final t = l.t;
+    String n(double? v) => v == null ? '—' : Num.format(v, lang: l.code);
+    String m(int v) => v == 0 ? '—' : Money.format(v, withSymbol: false, lang: l.code);
+
+    final headers = <String>[
+      t.hsMonth,
+      for (final u in sheet.types) ...['${Labels.utilityName(u, l.code)} ${t.hsNew}', t.hsOld, t.hsAmount],
+      t.hsRent, t.hsOther, t.hsPenalty, t.hsExpected, t.hsPaid, t.hsSettled, t.hsRemarks,
+    ];
+    final data = <List<String>>[];
+    var totRent = 0, totOther = 0, totPen = 0, totExp = 0, totPaid = 0;
+    final totMeters = {for (final u in sheet.types) u.id: 0};
+    for (final r in sheet.rows) {
+      final inv = r.invoice;
+      totRent += r.rent;
+      totOther += r.other;
+      totPen += r.penalty;
+      totExp += r.expected;
+      totPaid += r.paid;
+      final remark = r.settled
+          ? t.hsPaidFull
+          : r.paid > 0
+              ? t.hsPartial(Money.format(r.remaining, lang: l.code))
+              : t.hsUnpaid;
+      data.add([
+        '${Period.label(inv.period, l.code)}${inv.kind == 1 ? ' (${t.hsExit})' : ''}',
+        for (final u in sheet.types) ...() {
+          final mt = r.meters[u.id];
+          totMeters[u.id] = totMeters[u.id]! + (mt?.amount ?? 0);
+          return [n(mt?.end), n(mt?.start), m(mt?.amount ?? 0)];
+        }(),
+        m(r.rent),
+        m(r.other),
+        m(r.penalty),
+        Money.format(r.expected, withSymbol: false, lang: l.code),
+        m(r.paid),
+        r.settledOn == null ? (r.lastPaymentOn == null ? '—' : l.date(r.lastPaymentOn)) : l.date(r.settledOn),
+        remark,
+      ]);
+    }
+    data.add([
+      t.hsTotals,
+      for (final u in sheet.types) ...['', '', m(totMeters[u.id]!)],
+      m(totRent), m(totOther), m(totPen), Money.format(totExp, withSymbol: false, lang: l.code), m(totPaid), '', '',
+    ]);
+
+    final rentLines = sheet.rents.length <= 1
+        ? <String>[]
+        : [
+            for (final r in sheet.rents)
+              '${r.fromPeriod == UtilityTariffs.origin ? t.rentFromStart : t.rentSince(Period.label(r.fromPeriod, l.code))} : ${l.money(r.rent)}',
+          ];
+
+    doc.addPage(pw.MultiPage(
+      pageFormat: PdfPageFormat.a4.landscape,
+      margin: const pw.EdgeInsets.all(24),
+      footer: (ctx) => pw.Container(
+        alignment: pw.Alignment.centerRight,
+        child: pw.Text('${t.hsPrinted(l.date(DateTime.now()))}  ·  ${t.pdfPage('${ctx.pageNumber}', '${ctx.pagesCount}')}',
+            style: const pw.TextStyle(fontSize: 7, color: _muted)),
+      ),
+      build: (ctx) => [
+        pw.Row(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
+          pw.Expanded(
+            child: pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
+              pw.Text(App.settings.businessName, style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold, color: _primary)),
+              pw.SizedBox(height: 4),
+              pw.Text(t.hsTitle.toUpperCase(), style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
+              pw.Text('${cv.place}  ·  ${cv.tenant.fullName}${cv.tenant.phone == null ? '' : '  ·  ${cv.tenant.phone}'}',
+                  style: const pw.TextStyle(fontSize: 10)),
+              pw.Text(t.hsLease(l.date(cv.c.startDate), cv.c.exitDate == null ? t.ongoing : l.date(cv.c.exitDate)),
+                  style: const pw.TextStyle(fontSize: 9, color: _muted)),
+            ]),
+          ),
+          pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.end, children: [
+            pw.Text('${t.monthlyRent} : ${l.money(cv.c.rent)}', style: const pw.TextStyle(fontSize: 9)),
+            pw.Text('${t.depositPaidShort} : ${l.money(cv.c.depositPaid)} / ${l.money(cv.c.deposit)}', style: const pw.TextStyle(fontSize: 9)),
+            ...rentLines.map((x) => pw.Text(x, style: const pw.TextStyle(fontSize: 8, color: _muted))),
+          ]),
+        ]),
+        pw.SizedBox(height: 10),
+        pw.TableHelper.fromTextArray(
+          headers: headers,
+          data: data,
+          border: pw.TableBorder.all(color: PdfColors.grey400, width: .4),
+          headerStyle: pw.TextStyle(fontSize: 7, fontWeight: pw.FontWeight.bold, color: PdfColors.white),
+          headerDecoration: const pw.BoxDecoration(color: _primary),
+          cellStyle: const pw.TextStyle(fontSize: 7),
+          cellPadding: const pw.EdgeInsets.symmetric(horizontal: 3, vertical: 3),
+          cellAlignments: {
+            for (var i = 1; i < headers.length - 2; i++) i: pw.Alignment.centerRight,
+          },
+          columnWidths: {
+            0: const pw.FlexColumnWidth(1.6),
+            headers.length - 1: const pw.FlexColumnWidth(1.4),
+          },
+          oddRowDecoration: const pw.BoxDecoration(color: _light),
+        ),
+        pw.SizedBox(height: 8),
+        pw.Text(t.hsBalance(l.money(cv.balance)),
+            style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold, color: cv.balance > 0 ? PdfColors.red700 : _primary)),
       ],
     ));
     return doc.save();

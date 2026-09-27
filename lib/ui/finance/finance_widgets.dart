@@ -82,9 +82,11 @@ class PaymentTile extends StatelessWidget {
       PaymentKind.depositApplied => (Icons.shield_rounded, AppColors.info, context.t.depositApplied),
       PaymentKind.refund => (Icons.undo_rounded, AppColors.warning, context.t.refundKind),
       PaymentKind.depositReceived => (Icons.savings_rounded, AppColors.info, context.t.depositReceived),
+      PaymentKind.penalty => (Icons.gavel_rounded, AppColors.danger, context.t.penaltyKind),
       _ => (Icons.south_west_rounded, AppColors.success, Labels.method(context.t, pay.method)),
     };
-    final outgoing = pay.kind == PaymentKind.refund;
+    // Remboursement ou pénalité : montant en moins pour le locataire (affiché en « − »).
+    final outgoing = pay.kind == PaymentKind.refund || pay.kind == PaymentKind.penalty;
     return AppCard(
       onTap: () => showPaymentActions(context, p),
       child: Row(children: [
@@ -98,7 +100,7 @@ class PaymentTile extends StatelessWidget {
           ]),
         ),
         Text('${outgoing ? '−' : '+'} ${Money.format(pay.amount)}',
-            style: TextStyle(fontWeight: FontWeight.w800, color: outgoing ? AppColors.warning : AppColors.success)),
+            style: TextStyle(fontWeight: FontWeight.w800, color: pay.kind == PaymentKind.penalty ? AppColors.danger : outgoing ? AppColors.warning : AppColors.success)),
       ]),
     );
   }
@@ -119,7 +121,7 @@ Future<void> showPaymentActions(BuildContext context, PaymentView pv) async {
             title: Text('${pay.receiptNumber} · ${Money.format(pay.amount)}', style: const TextStyle(fontWeight: FontWeight.w700)),
             subtitle: Text('${pv.cv.tenant.fullName} · ${Dates.d(pay.date)}'),
           ),
-          if (pay.kind != PaymentKind.depositApplied)
+          if (pay.kind != PaymentKind.depositApplied && pay.kind != PaymentKind.penalty)
             ListTile(
               leading: const Icon(Icons.picture_as_pdf_rounded),
               title: Text(receiptTitle(ctx, pay.kind)),

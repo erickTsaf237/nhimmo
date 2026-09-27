@@ -405,6 +405,7 @@ class AmountField extends StatelessWidget {
             prefixIcon: const Icon(Icons.payments_outlined),
             suffixText: Money.currency.symbol,
             helperText: helper,
+            helperMaxLines: 3,
           ),
           validator: (v) {
             if (v == null || v.trim().isEmpty) return required ? context.t.amountRequired : null;

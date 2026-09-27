@@ -10,6 +10,7 @@ class PaymentKind {
   static const depositApplied = 1;
   static const refund = 2;
   static const depositReceived = 3;
+  static const penalty = 4;
 }
 
 /// Enregistrement, modification et suppression des versements.
@@ -20,6 +21,7 @@ class PaymentService {
   static String _prefix(int kind) => switch (kind) {
         PaymentKind.refund => 'R',
         PaymentKind.depositReceived => 'C',
+        PaymentKind.penalty => 'P',
         _ => 'Q',
       };
 
@@ -64,6 +66,49 @@ class PaymentService {
         await (db.update(db.payments)..where((x) => x.id.equals(existing.id))).write(c);
         if (kind == PaymentKind.depositReceived) await _adjustDeposit(contractId, amount - existing.amount);
         return existing.id;
+      });
+
+  /// Pénalité de retard applicable : celle de l'appartement, sinon celle de l'immeuble.
+  static int defaultPenalty(Apartment a, Building b) => a.latePenalty ?? b.latePenalty;
+
+  /// Encaissement avec pénalité de retard : la pénalité est enregistrée comme une dette
+  /// (kind 4) juste avant le paiement. Si le montant saisi diffère de la pénalité par défaut,
+  /// il devient la pénalité propre à l'appartement (l'immeuble n'est pas modifié).
+  static Future<int> saveWithPenalty({
+    required Apartment apartment,
+    required Building building,
+    required int contractId,
+    required int penalty,
+    required DateTime date,
+    required int amount,
+    required String method,
+    String? reference,
+    String? note,
+  }) =>
+      db.transaction(() async {
+        if (penalty > 0) {
+          await save(
+            contractId: contractId,
+            kind: PaymentKind.penalty,
+            date: date,
+            amount: penalty,
+            method: method,
+            note: note,
+          );
+        }
+        if (penalty != defaultPenalty(apartment, building)) {
+          await (db.update(db.apartments)..where((x) => x.id.equals(apartment.id)))
+              .write(ApartmentsCompanion(latePenalty: Value(penalty)));
+        }
+        return save(
+          contractId: contractId,
+          kind: PaymentKind.payment,
+          date: date,
+          amount: amount,
+          method: method,
+          reference: reference,
+          note: note,
+        );
       });
 
   static Future<void> delete(Payment p) => db.transaction(() async {

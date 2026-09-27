@@ -8,7 +8,10 @@ import '../../core/i18n.dart';
 import '../../core/labels.dart';
 import '../../core/money.dart';
 import '../../data/database.dart';
+import '../../core/dates.dart';
+import '../../l10n/app_localizations.dart';
 import '../../services/app_state.dart';
+import '../../services/tariff_service.dart';
 import '../theme.dart';
 import '../widgets.dart';
 
@@ -114,6 +117,44 @@ class _UtilityTypeFormState extends State<UtilityTypeForm> {
   late bool _active = u?.active ?? true;
   final _simCons = TextEditingController(text: '10');
 
+  /// Historique des tarifs (du plus ancien au plus récent).
+  List<UtilityTariff> _hist = [];
+
+  /// true : corrige le tarif en vigueur ; false : nouveau tarif à partir de [_from].
+  bool _correct = false;
+  int _from = Period.current();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadHistory();
+  }
+
+  Future<void> _loadHistory() async {
+    if (u == null) return;
+    final h = await TariffService.history(u!.id);
+    if (!mounted) return;
+    setState(() {
+      _hist = h;
+      if (h.isNotEmpty) _fill(h.last);
+    });
+  }
+
+  void _fill(UtilityTariff r) {
+    _price.text = Money.toInput(r.unitPrice);
+    _fee.text = r.fixedFee == 0 ? '' : Money.toInput(r.fixedFee);
+    _vat.text = r.vatRate == 0 ? '' : Num.format(r.vatRate);
+    _mode = VatMode.values[r.vatMode];
+    _vatOnFee = r.vatOnFixedFee;
+  }
+
+  bool _sameAs(UtilityTariff r, Tariff t) =>
+      r.unitPrice == t.unitPrice && r.fixedFee == t.fixedFee && r.vatRate == t.vatRate &&
+      r.vatMode == t.vatMode.index && r.vatOnFixedFee == t.vatOnFixedFee;
+
+  String _since(AppLocalizations t, int p) =>
+      p == UtilityTariffs.origin ? t.tariffOrigin : t.tariffSince(Period.label(p));
+
   @override
   Widget build(BuildContext context) {
     final t = context.t;
@@ -136,20 +177,23 @@ class _UtilityTypeFormState extends State<UtilityTypeForm> {
         final c = UtilityTypesCompanion(
           name: Value(_name.text.trim()),
           unit: Value(_unit.text.trim()),
-          unitPrice: Value(tariff.unitPrice),
-          fixedFee: Value(tariff.fixedFee),
-          vatRate: Value(tariff.vatRate),
-          vatMode: Value(_mode.index),
-          vatOnFixedFee: Value(_vatOnFee),
           iconKey: Value(_icon),
           colorValue: Value(_color),
           active: Value(_active),
           translations: Value(tr.isEmpty ? null : jsonEncode(tr)),
         );
         if (u == null) {
-          await _db.into(_db.utilityTypes).insert(c);
+          final id = await _db.into(_db.utilityTypes).insert(c.copyWith(unitPrice: Value(tariff.unitPrice)));
+          await TariffService.save(id, UtilityTariffs.origin, tariff);
         } else {
           await (_db.update(_db.utilityTypes)..where((x) => x.id.equals(u!.id))).write(c);
+          final latest = _hist.isEmpty ? null : _hist.last;
+          if (latest == null) {
+            await TariffService.save(u!.id, UtilityTariffs.origin, tariff);
+          } else if (!_sameAs(latest, tariff)) {
+            // Correction : même date d'effet. Sinon nouveau tarif daté : l'ancien reste pour les mois passés.
+            await TariffService.save(u!.id, _correct ? latest.fromPeriod : _from, tariff);
+          }
         }
         if (context.mounted) Navigator.pop(context);
       },
@@ -180,6 +224,33 @@ class _UtilityTypeFormState extends State<UtilityTypeForm> {
         for (final code in I18n.codes)
           Field(_translations[code]!, t.nameIn(I18n.nativeName(code)), icon: Icons.translate_rounded),
         SectionHeader(t.tariff),
+        if (_hist.isNotEmpty) ...[
+          Wrap(spacing: 8, runSpacing: 8, children: [
+            ChoiceChip(
+              label: Text(t.tariffNewFrom(Period.label(_from))),
+              selected: !_correct,
+              onSelected: (_) async {
+                final p = await pickMonth(context, _from);
+                setState(() {
+                  _correct = false;
+                  if (p != null) _from = p;
+                });
+              },
+            ),
+            ChoiceChip(
+              label: Text(t.tariffCorrect),
+              selected: _correct,
+              onSelected: (_) => setState(() => _correct = true),
+            ),
+          ]),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(4, 8, 4, 14),
+            child: Text(
+              _correct ? t.tariffCorrectHelp(_since(t, _hist.last.fromPeriod)) : t.tariffNewHelp,
+              style: TextStyle(fontSize: 12.5, color: Theme.of(context).colorScheme.onSurfaceVariant),
+            ),
+          ),
+        ],
         AmountField(_price, t.unitPrice, onChanged: (_) => setState(() {})),
         AmountField(_fee, t.meterFee, required: false, onChanged: (_) => setState(() {})),
         SectionHeader(t.vat),
@@ -199,6 +270,45 @@ class _UtilityTypeFormState extends State<UtilityTypeForm> {
               validator: (v) => Num.parse(v ?? '') == null ? t.rateRequired : null,
               onChanged: (_) => setState(() {})),
           SwitchRow(title: t.vatOnFee, value: _vatOnFee, onChanged: (v) => setState(() => _vatOnFee = v)),
+        ],
+        if (_hist.isNotEmpty) ...[
+          SectionHeader(t.tariffHistory),
+          for (final r in _hist.reversed)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: AppCard(
+                padding: const EdgeInsets.fromLTRB(16, 10, 8, 10),
+                child: Row(children: [
+                  Expanded(
+                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      Row(children: [
+                        Text(_since(t, r.fromPeriod), style: const TextStyle(fontWeight: FontWeight.w700)),
+                        if (identical(r, TariffService.pick(_hist, Period.current()))) ...[
+                          const SizedBox(width: 8),
+                          StatusChip(t.tariffCurrent, AppColors.success),
+                        ],
+                      ]),
+                      Text(
+                        '${t.pricePerUnit(Money.format(r.unitPrice), _unit.text)}'
+                        '${r.fixedFee > 0 ? ' · ${t.maintenanceShort(Money.format(r.fixedFee))}' : ''}'
+                        ' · ${VatMode.values[r.vatMode] == VatMode.none ? t.vatNone : t.withRate(Labels.vatMode(t, VatMode.values[r.vatMode]), Num.format(r.vatRate))}',
+                        style: const TextStyle(fontSize: 12.5),
+                      ),
+                    ]),
+                  ),
+                  if (_hist.length > 1)
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline_rounded),
+                      onPressed: () async {
+                        if (await confirm(context, t.deleteTariffQ, t.deleteTariffHelp, ok: t.delete, danger: true)) {
+                          await TariffService.delete(r);
+                          await _loadHistory();
+                        }
+                      },
+                    ),
+                ]),
+              ),
+            ),
         ],
         SectionHeader(t.simulation),
         AppCard(

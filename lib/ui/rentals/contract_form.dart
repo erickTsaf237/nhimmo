@@ -6,6 +6,9 @@ import '../../core/money.dart';
 import '../../data/database.dart';
 import '../../data/repo.dart';
 import '../../services/app_state.dart';
+import '../../services/billing_service.dart';
+import '../../services/rent_service.dart';
+import '../../services/pdf_service.dart';
 import '../../services/photo_service.dart';
 import '../theme.dart';
 import '../widgets.dart';
@@ -50,7 +53,11 @@ class _ContractFormState extends State<ContractForm> {
   late int? _tenantId = widget.contract?.tenantId;
   late DateTime _start = widget.contract?.startDate ?? Dates.dayOnly(DateTime.now());
   late DateTime? _plannedEnd = widget.contract?.plannedEndDate;
-  late bool _prorata = widget.contract?.entryProrata ?? true;
+  /// Premier loyer (payé à la signature) : 0 prorata, 1 mois complet, 2 forfait.
+  late int _firstMode = widget.contract?.firstRentMode ?? 0;
+  late final _firstAmount = TextEditingController(
+      text: widget.contract?.firstRentAmount == null ? '' : Money.toInput(widget.contract!.firstRentAmount!));
+  late final _firstNote = TextEditingController(text: widget.contract?.firstRentNote);
   late bool _tacit = widget.contract?.tacitRenewal ?? true;
   late final _rent = TextEditingController(text: widget.contract == null ? '' : Money.toInput(widget.contract!.rent));
   late final _deposit = TextEditingController(text: widget.contract == null ? '' : Money.toInput(widget.contract!.deposit));
@@ -61,6 +68,11 @@ class _ContractFormState extends State<ContractForm> {
   bool _servicesLoaded = false;
 
   bool get _editing => widget.contract != null;
+
+  // Changement de loyer d'un contrat existant : nouveau loyer daté, ou correction du loyer en vigueur.
+  int _rentFrom = Period.current();
+  bool _rentCorrect = false;
+  bool get _rentChanged => _editing && Money.parse(_rent.text) != null && Money.parse(_rent.text) != widget.contract!.rent;
 
   @override
   void initState() {
@@ -115,18 +127,29 @@ class _ContractFormState extends State<ContractForm> {
         tenantId: Value(_tenantId!),
         startDate: Value(_start),
         plannedEndDate: Value(_plannedEnd),
-        rent: Value(rent),
+        // Le loyer d'un contrat existant passe par l'historique (voir plus bas).
+        rent: _editing ? const Value.absent() : Value(rent),
         deposit: Value(deposit),
         depositPaid: Value(depositPaid),
-        entryProrata: Value(_prorata),
+        entryProrata: Value(_firstMode == 0),
+        firstRentMode: Value(_firstMode),
+        firstRentAmount: Value(_firstMode == 2 ? Money.parse(_firstAmount.text) : null),
+        firstRentNote: Value(_firstMode == 2 ? emptyToNull(_firstNote.text) : null),
         tacitRenewal: Value(_tacit),
         notes: Value(emptyToNull(_notes.text)),
       );
       if (_editing) {
         await (db.update(db.contracts)..where((x) => x.id.equals(contractId))).write(c);
+        if (rent != widget.contract!.rent) {
+          final hist = await RentService.history(contractId);
+          final from = _rentCorrect && hist.isNotEmpty ? hist.last.fromPeriod : _rentFrom;
+          if (hist.isEmpty) await RentService.save(contractId, UtilityTariffs.origin, widget.contract!.rent);
+          await RentService.save(contractId, from, rent);
+        }
         await (db.delete(db.contractServices)..where((s) => s.contractId.equals(contractId))).go();
       } else {
         contractId = await db.into(db.contracts).insert(c);
+        await RentService.save(contractId, UtilityTariffs.origin, rent);
         for (final e in _entry.entries) {
           final v = Num.parse(e.value.ctrl.text);
           if (v == null) continue;
@@ -151,10 +174,17 @@ class _ContractFormState extends State<ContractForm> {
       }
     });
     if (!mounted) return;
+    // Le premier loyer se paie à la signature : sa facture est créée tout de suite
+    // (sauf contrat saisi a posteriori, dont les mois passés se facturent normalement).
+    if (!_editing && Period.of(_start) >= Period.current()) await BillingService.generateEntryInvoice(contractId);
+    if (!mounted) return;
     if (_editing) {
       Navigator.pop(context);
     } else {
-      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => ContractDetailPage(contractId)));
+      final nav = Navigator.of(context);
+      final title = context.t.signSlip;
+      nav.pushReplacement(MaterialPageRoute(builder: (_) => ContractDetailPage(contractId)));
+      openPdf(nav.context, title, 'bordereau-$contractId.pdf', () => PdfService.signingSlip(contractId));
     }
   }
 
@@ -237,17 +267,59 @@ class _ContractFormState extends State<ContractForm> {
                 value: _tacit,
                 onChanged: (v) => setState(() => _tacit = v),
               ),
-            AmountField(_rent, context.t.monthlyRent),
+            AmountField(_rent, context.t.monthlyRent, onChanged: (_) => setState(() {})),
+            if (_rentChanged) ...[
+              Wrap(spacing: 8, runSpacing: 8, children: [
+                ChoiceChip(
+                  label: Text(context.t.rentNewFrom(Period.label(_rentFrom))),
+                  selected: !_rentCorrect,
+                  onSelected: (_) async {
+                    final p = await pickMonth(context, _rentFrom);
+                    setState(() {
+                      _rentCorrect = false;
+                      if (p != null) _rentFrom = p;
+                    });
+                  },
+                ),
+                ChoiceChip(
+                  label: Text(context.t.rentCorrect),
+                  selected: _rentCorrect,
+                  onSelected: (_) => setState(() => _rentCorrect = true),
+                ),
+              ]),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(4, 8, 4, 14),
+                child: Text(_rentCorrect ? context.t.rentCorrectHelp : context.t.rentNewHelp,
+                    style: TextStyle(fontSize: 12.5, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+              ),
+            ],
             AmountField(_deposit, context.t.depositRequired, required: false),
             AmountField(_depositPaid, context.t.depositPaid, required: false),
-            SwitchRow(
-              title: context.t.firstMonthProrata,
-              subtitle: _prorata
-                  ? context.t.firstMonthProrataOn
-                  : context.t.firstMonthProrataOff,
-              value: _prorata,
-              onChanged: (v) => setState(() => _prorata = v),
+            SectionHeader(context.t.firstRent),
+            SegmentedButton<int>(
+              segments: [
+                ButtonSegment(value: 0, label: Text(context.t.prorated)),
+                ButtonSegment(value: 1, label: Text(context.t.fullMonth)),
+                ButtonSegment(value: 2, label: Text(context.t.firstRentFlat)),
+              ],
+              selected: {_firstMode},
+              onSelectionChanged: (v) => setState(() => _firstMode = v.first),
             ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(4, 8, 4, 14),
+              child: Text(
+                switch (_firstMode) {
+                  0 => context.t.firstMonthProrataOn,
+                  1 => context.t.firstMonthProrataOff,
+                  _ => context.t.firstRentFlatHelp,
+                } + ' ' + context.t.firstRentDueAtSigning,
+                style: TextStyle(fontSize: 12.5, color: Theme.of(context).colorScheme.onSurfaceVariant),
+              ),
+            ),
+            if (_firstMode == 2) ...[
+              AmountField(_firstAmount, context.t.firstRentAmount),
+              Field(_firstNote, context.t.firstRentNote, icon: Icons.notes, hint: context.t.firstRentNoteHint),
+            ],
             SectionHeader(context.t.services,
                 trailing: d.services.isEmpty
                     ? null

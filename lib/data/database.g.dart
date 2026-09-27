@@ -459,8 +459,27 @@ class $BuildingsTable extends Buildings
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _latePenaltyMeta = const VerificationMeta(
+    'latePenalty',
+  );
   @override
-  List<GeneratedColumn> get $columns => [id, ownerId, name, address, notes];
+  late final GeneratedColumn<int> latePenalty = GeneratedColumn<int>(
+    'late_penalty',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    ownerId,
+    name,
+    address,
+    notes,
+    latePenalty,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -504,6 +523,15 @@ class $BuildingsTable extends Buildings
         notes.isAcceptableOrUnknown(data['notes']!, _notesMeta),
       );
     }
+    if (data.containsKey('late_penalty')) {
+      context.handle(
+        _latePenaltyMeta,
+        latePenalty.isAcceptableOrUnknown(
+          data['late_penalty']!,
+          _latePenaltyMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -533,6 +561,10 @@ class $BuildingsTable extends Buildings
         DriftSqlType.string,
         data['${effectivePrefix}notes'],
       ),
+      latePenalty: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}late_penalty'],
+      )!,
     );
   }
 
@@ -548,12 +580,16 @@ class Building extends DataClass implements Insertable<Building> {
   final String name;
   final String? address;
   final String? notes;
+
+  /// Pénalité de retard par défaut des appartements de l'immeuble (centimes).
+  final int latePenalty;
   const Building({
     required this.id,
     required this.ownerId,
     required this.name,
     this.address,
     this.notes,
+    required this.latePenalty,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -567,6 +603,7 @@ class Building extends DataClass implements Insertable<Building> {
     if (!nullToAbsent || notes != null) {
       map['notes'] = Variable<String>(notes);
     }
+    map['late_penalty'] = Variable<int>(latePenalty);
     return map;
   }
 
@@ -581,6 +618,7 @@ class Building extends DataClass implements Insertable<Building> {
       notes: notes == null && nullToAbsent
           ? const Value.absent()
           : Value(notes),
+      latePenalty: Value(latePenalty),
     );
   }
 
@@ -595,6 +633,7 @@ class Building extends DataClass implements Insertable<Building> {
       name: serializer.fromJson<String>(json['name']),
       address: serializer.fromJson<String?>(json['address']),
       notes: serializer.fromJson<String?>(json['notes']),
+      latePenalty: serializer.fromJson<int>(json['latePenalty']),
     );
   }
   @override
@@ -606,6 +645,7 @@ class Building extends DataClass implements Insertable<Building> {
       'name': serializer.toJson<String>(name),
       'address': serializer.toJson<String?>(address),
       'notes': serializer.toJson<String?>(notes),
+      'latePenalty': serializer.toJson<int>(latePenalty),
     };
   }
 
@@ -615,12 +655,14 @@ class Building extends DataClass implements Insertable<Building> {
     String? name,
     Value<String?> address = const Value.absent(),
     Value<String?> notes = const Value.absent(),
+    int? latePenalty,
   }) => Building(
     id: id ?? this.id,
     ownerId: ownerId ?? this.ownerId,
     name: name ?? this.name,
     address: address.present ? address.value : this.address,
     notes: notes.present ? notes.value : this.notes,
+    latePenalty: latePenalty ?? this.latePenalty,
   );
   Building copyWithCompanion(BuildingsCompanion data) {
     return Building(
@@ -629,6 +671,9 @@ class Building extends DataClass implements Insertable<Building> {
       name: data.name.present ? data.name.value : this.name,
       address: data.address.present ? data.address.value : this.address,
       notes: data.notes.present ? data.notes.value : this.notes,
+      latePenalty: data.latePenalty.present
+          ? data.latePenalty.value
+          : this.latePenalty,
     );
   }
 
@@ -639,13 +684,15 @@ class Building extends DataClass implements Insertable<Building> {
           ..write('ownerId: $ownerId, ')
           ..write('name: $name, ')
           ..write('address: $address, ')
-          ..write('notes: $notes')
+          ..write('notes: $notes, ')
+          ..write('latePenalty: $latePenalty')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, ownerId, name, address, notes);
+  int get hashCode =>
+      Object.hash(id, ownerId, name, address, notes, latePenalty);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -654,7 +701,8 @@ class Building extends DataClass implements Insertable<Building> {
           other.ownerId == this.ownerId &&
           other.name == this.name &&
           other.address == this.address &&
-          other.notes == this.notes);
+          other.notes == this.notes &&
+          other.latePenalty == this.latePenalty);
 }
 
 class BuildingsCompanion extends UpdateCompanion<Building> {
@@ -663,12 +711,14 @@ class BuildingsCompanion extends UpdateCompanion<Building> {
   final Value<String> name;
   final Value<String?> address;
   final Value<String?> notes;
+  final Value<int> latePenalty;
   const BuildingsCompanion({
     this.id = const Value.absent(),
     this.ownerId = const Value.absent(),
     this.name = const Value.absent(),
     this.address = const Value.absent(),
     this.notes = const Value.absent(),
+    this.latePenalty = const Value.absent(),
   });
   BuildingsCompanion.insert({
     this.id = const Value.absent(),
@@ -676,6 +726,7 @@ class BuildingsCompanion extends UpdateCompanion<Building> {
     required String name,
     this.address = const Value.absent(),
     this.notes = const Value.absent(),
+    this.latePenalty = const Value.absent(),
   }) : ownerId = Value(ownerId),
        name = Value(name);
   static Insertable<Building> custom({
@@ -684,6 +735,7 @@ class BuildingsCompanion extends UpdateCompanion<Building> {
     Expression<String>? name,
     Expression<String>? address,
     Expression<String>? notes,
+    Expression<int>? latePenalty,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -691,6 +743,7 @@ class BuildingsCompanion extends UpdateCompanion<Building> {
       if (name != null) 'name': name,
       if (address != null) 'address': address,
       if (notes != null) 'notes': notes,
+      if (latePenalty != null) 'late_penalty': latePenalty,
     });
   }
 
@@ -700,6 +753,7 @@ class BuildingsCompanion extends UpdateCompanion<Building> {
     Value<String>? name,
     Value<String?>? address,
     Value<String?>? notes,
+    Value<int>? latePenalty,
   }) {
     return BuildingsCompanion(
       id: id ?? this.id,
@@ -707,6 +761,7 @@ class BuildingsCompanion extends UpdateCompanion<Building> {
       name: name ?? this.name,
       address: address ?? this.address,
       notes: notes ?? this.notes,
+      latePenalty: latePenalty ?? this.latePenalty,
     );
   }
 
@@ -728,6 +783,9 @@ class BuildingsCompanion extends UpdateCompanion<Building> {
     if (notes.present) {
       map['notes'] = Variable<String>(notes.value);
     }
+    if (latePenalty.present) {
+      map['late_penalty'] = Variable<int>(latePenalty.value);
+    }
     return map;
   }
 
@@ -738,7 +796,8 @@ class BuildingsCompanion extends UpdateCompanion<Building> {
           ..write('ownerId: $ownerId, ')
           ..write('name: $name, ')
           ..write('address: $address, ')
-          ..write('notes: $notes')
+          ..write('notes: $notes, ')
+          ..write('latePenalty: $latePenalty')
           ..write(')'))
         .toString();
   }
@@ -843,6 +902,17 @@ class $ApartmentsTable extends Apartments
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _latePenaltyMeta = const VerificationMeta(
+    'latePenalty',
+  );
+  @override
+  late final GeneratedColumn<int> latePenalty = GeneratedColumn<int>(
+    'late_penalty',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -853,6 +923,7 @@ class $ApartmentsTable extends Apartments
     rent,
     deposit,
     archived,
+    latePenalty,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -918,6 +989,15 @@ class $ApartmentsTable extends Apartments
         archived.isAcceptableOrUnknown(data['archived']!, _archivedMeta),
       );
     }
+    if (data.containsKey('late_penalty')) {
+      context.handle(
+        _latePenaltyMeta,
+        latePenalty.isAcceptableOrUnknown(
+          data['late_penalty']!,
+          _latePenaltyMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -959,6 +1039,10 @@ class $ApartmentsTable extends Apartments
         DriftSqlType.bool,
         data['${effectivePrefix}archived'],
       )!,
+      latePenalty: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}late_penalty'],
+      ),
     );
   }
 
@@ -979,6 +1063,9 @@ class Apartment extends DataClass implements Insertable<Apartment> {
   final int rent;
   final int deposit;
   final bool archived;
+
+  /// Pénalité de retard propre à l'appartement ; null = celle de l'immeuble.
+  final int? latePenalty;
   const Apartment({
     required this.id,
     required this.buildingId,
@@ -988,6 +1075,7 @@ class Apartment extends DataClass implements Insertable<Apartment> {
     required this.rent,
     required this.deposit,
     required this.archived,
+    this.latePenalty,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1004,6 +1092,9 @@ class Apartment extends DataClass implements Insertable<Apartment> {
     map['rent'] = Variable<int>(rent);
     map['deposit'] = Variable<int>(deposit);
     map['archived'] = Variable<bool>(archived);
+    if (!nullToAbsent || latePenalty != null) {
+      map['late_penalty'] = Variable<int>(latePenalty);
+    }
     return map;
   }
 
@@ -1021,6 +1112,9 @@ class Apartment extends DataClass implements Insertable<Apartment> {
       rent: Value(rent),
       deposit: Value(deposit),
       archived: Value(archived),
+      latePenalty: latePenalty == null && nullToAbsent
+          ? const Value.absent()
+          : Value(latePenalty),
     );
   }
 
@@ -1038,6 +1132,7 @@ class Apartment extends DataClass implements Insertable<Apartment> {
       rent: serializer.fromJson<int>(json['rent']),
       deposit: serializer.fromJson<int>(json['deposit']),
       archived: serializer.fromJson<bool>(json['archived']),
+      latePenalty: serializer.fromJson<int?>(json['latePenalty']),
     );
   }
   @override
@@ -1052,6 +1147,7 @@ class Apartment extends DataClass implements Insertable<Apartment> {
       'rent': serializer.toJson<int>(rent),
       'deposit': serializer.toJson<int>(deposit),
       'archived': serializer.toJson<bool>(archived),
+      'latePenalty': serializer.toJson<int?>(latePenalty),
     };
   }
 
@@ -1064,6 +1160,7 @@ class Apartment extends DataClass implements Insertable<Apartment> {
     int? rent,
     int? deposit,
     bool? archived,
+    Value<int?> latePenalty = const Value.absent(),
   }) => Apartment(
     id: id ?? this.id,
     buildingId: buildingId ?? this.buildingId,
@@ -1073,6 +1170,7 @@ class Apartment extends DataClass implements Insertable<Apartment> {
     rent: rent ?? this.rent,
     deposit: deposit ?? this.deposit,
     archived: archived ?? this.archived,
+    latePenalty: latePenalty.present ? latePenalty.value : this.latePenalty,
   );
   Apartment copyWithCompanion(ApartmentsCompanion data) {
     return Apartment(
@@ -1088,6 +1186,9 @@ class Apartment extends DataClass implements Insertable<Apartment> {
       rent: data.rent.present ? data.rent.value : this.rent,
       deposit: data.deposit.present ? data.deposit.value : this.deposit,
       archived: data.archived.present ? data.archived.value : this.archived,
+      latePenalty: data.latePenalty.present
+          ? data.latePenalty.value
+          : this.latePenalty,
     );
   }
 
@@ -1101,7 +1202,8 @@ class Apartment extends DataClass implements Insertable<Apartment> {
           ..write('description: $description, ')
           ..write('rent: $rent, ')
           ..write('deposit: $deposit, ')
-          ..write('archived: $archived')
+          ..write('archived: $archived, ')
+          ..write('latePenalty: $latePenalty')
           ..write(')'))
         .toString();
   }
@@ -1116,6 +1218,7 @@ class Apartment extends DataClass implements Insertable<Apartment> {
     rent,
     deposit,
     archived,
+    latePenalty,
   );
   @override
   bool operator ==(Object other) =>
@@ -1128,7 +1231,8 @@ class Apartment extends DataClass implements Insertable<Apartment> {
           other.description == this.description &&
           other.rent == this.rent &&
           other.deposit == this.deposit &&
-          other.archived == this.archived);
+          other.archived == this.archived &&
+          other.latePenalty == this.latePenalty);
 }
 
 class ApartmentsCompanion extends UpdateCompanion<Apartment> {
@@ -1140,6 +1244,7 @@ class ApartmentsCompanion extends UpdateCompanion<Apartment> {
   final Value<int> rent;
   final Value<int> deposit;
   final Value<bool> archived;
+  final Value<int?> latePenalty;
   const ApartmentsCompanion({
     this.id = const Value.absent(),
     this.buildingId = const Value.absent(),
@@ -1149,6 +1254,7 @@ class ApartmentsCompanion extends UpdateCompanion<Apartment> {
     this.rent = const Value.absent(),
     this.deposit = const Value.absent(),
     this.archived = const Value.absent(),
+    this.latePenalty = const Value.absent(),
   });
   ApartmentsCompanion.insert({
     this.id = const Value.absent(),
@@ -1159,6 +1265,7 @@ class ApartmentsCompanion extends UpdateCompanion<Apartment> {
     this.rent = const Value.absent(),
     this.deposit = const Value.absent(),
     this.archived = const Value.absent(),
+    this.latePenalty = const Value.absent(),
   }) : buildingId = Value(buildingId),
        name = Value(name);
   static Insertable<Apartment> custom({
@@ -1170,6 +1277,7 @@ class ApartmentsCompanion extends UpdateCompanion<Apartment> {
     Expression<int>? rent,
     Expression<int>? deposit,
     Expression<bool>? archived,
+    Expression<int>? latePenalty,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1180,6 +1288,7 @@ class ApartmentsCompanion extends UpdateCompanion<Apartment> {
       if (rent != null) 'rent': rent,
       if (deposit != null) 'deposit': deposit,
       if (archived != null) 'archived': archived,
+      if (latePenalty != null) 'late_penalty': latePenalty,
     });
   }
 
@@ -1192,6 +1301,7 @@ class ApartmentsCompanion extends UpdateCompanion<Apartment> {
     Value<int>? rent,
     Value<int>? deposit,
     Value<bool>? archived,
+    Value<int?>? latePenalty,
   }) {
     return ApartmentsCompanion(
       id: id ?? this.id,
@@ -1202,6 +1312,7 @@ class ApartmentsCompanion extends UpdateCompanion<Apartment> {
       rent: rent ?? this.rent,
       deposit: deposit ?? this.deposit,
       archived: archived ?? this.archived,
+      latePenalty: latePenalty ?? this.latePenalty,
     );
   }
 
@@ -1232,6 +1343,9 @@ class ApartmentsCompanion extends UpdateCompanion<Apartment> {
     if (archived.present) {
       map['archived'] = Variable<bool>(archived.value);
     }
+    if (latePenalty.present) {
+      map['late_penalty'] = Variable<int>(latePenalty.value);
+    }
     return map;
   }
 
@@ -1245,7 +1359,8 @@ class ApartmentsCompanion extends UpdateCompanion<Apartment> {
           ..write('description: $description, ')
           ..write('rent: $rent, ')
           ..write('deposit: $deposit, ')
-          ..write('archived: $archived')
+          ..write('archived: $archived, ')
+          ..write('latePenalty: $latePenalty')
           ..write(')'))
         .toString();
   }
@@ -2458,6 +2573,518 @@ class UtilityTypesCompanion extends UpdateCompanion<UtilityType> {
   }
 }
 
+class $UtilityTariffsTable extends UtilityTariffs
+    with TableInfo<$UtilityTariffsTable, UtilityTariff> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $UtilityTariffsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _utilityTypeIdMeta = const VerificationMeta(
+    'utilityTypeId',
+  );
+  @override
+  late final GeneratedColumn<int> utilityTypeId = GeneratedColumn<int>(
+    'utility_type_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES utility_types (id)',
+    ),
+  );
+  static const VerificationMeta _fromPeriodMeta = const VerificationMeta(
+    'fromPeriod',
+  );
+  @override
+  late final GeneratedColumn<int> fromPeriod = GeneratedColumn<int>(
+    'from_period',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _unitPriceMeta = const VerificationMeta(
+    'unitPrice',
+  );
+  @override
+  late final GeneratedColumn<int> unitPrice = GeneratedColumn<int>(
+    'unit_price',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _fixedFeeMeta = const VerificationMeta(
+    'fixedFee',
+  );
+  @override
+  late final GeneratedColumn<int> fixedFee = GeneratedColumn<int>(
+    'fixed_fee',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _vatRateMeta = const VerificationMeta(
+    'vatRate',
+  );
+  @override
+  late final GeneratedColumn<double> vatRate = GeneratedColumn<double>(
+    'vat_rate',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _vatModeMeta = const VerificationMeta(
+    'vatMode',
+  );
+  @override
+  late final GeneratedColumn<int> vatMode = GeneratedColumn<int>(
+    'vat_mode',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _vatOnFixedFeeMeta = const VerificationMeta(
+    'vatOnFixedFee',
+  );
+  @override
+  late final GeneratedColumn<bool> vatOnFixedFee = GeneratedColumn<bool>(
+    'vat_on_fixed_fee',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("vat_on_fixed_fee" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    utilityTypeId,
+    fromPeriod,
+    unitPrice,
+    fixedFee,
+    vatRate,
+    vatMode,
+    vatOnFixedFee,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'utility_tariffs';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<UtilityTariff> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('utility_type_id')) {
+      context.handle(
+        _utilityTypeIdMeta,
+        utilityTypeId.isAcceptableOrUnknown(
+          data['utility_type_id']!,
+          _utilityTypeIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_utilityTypeIdMeta);
+    }
+    if (data.containsKey('from_period')) {
+      context.handle(
+        _fromPeriodMeta,
+        fromPeriod.isAcceptableOrUnknown(data['from_period']!, _fromPeriodMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_fromPeriodMeta);
+    }
+    if (data.containsKey('unit_price')) {
+      context.handle(
+        _unitPriceMeta,
+        unitPrice.isAcceptableOrUnknown(data['unit_price']!, _unitPriceMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_unitPriceMeta);
+    }
+    if (data.containsKey('fixed_fee')) {
+      context.handle(
+        _fixedFeeMeta,
+        fixedFee.isAcceptableOrUnknown(data['fixed_fee']!, _fixedFeeMeta),
+      );
+    }
+    if (data.containsKey('vat_rate')) {
+      context.handle(
+        _vatRateMeta,
+        vatRate.isAcceptableOrUnknown(data['vat_rate']!, _vatRateMeta),
+      );
+    }
+    if (data.containsKey('vat_mode')) {
+      context.handle(
+        _vatModeMeta,
+        vatMode.isAcceptableOrUnknown(data['vat_mode']!, _vatModeMeta),
+      );
+    }
+    if (data.containsKey('vat_on_fixed_fee')) {
+      context.handle(
+        _vatOnFixedFeeMeta,
+        vatOnFixedFee.isAcceptableOrUnknown(
+          data['vat_on_fixed_fee']!,
+          _vatOnFixedFeeMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  UtilityTariff map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return UtilityTariff(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      utilityTypeId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}utility_type_id'],
+      )!,
+      fromPeriod: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}from_period'],
+      )!,
+      unitPrice: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}unit_price'],
+      )!,
+      fixedFee: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}fixed_fee'],
+      )!,
+      vatRate: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}vat_rate'],
+      )!,
+      vatMode: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}vat_mode'],
+      )!,
+      vatOnFixedFee: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}vat_on_fixed_fee'],
+      )!,
+    );
+  }
+
+  @override
+  $UtilityTariffsTable createAlias(String alias) {
+    return $UtilityTariffsTable(attachedDatabase, alias);
+  }
+}
+
+class UtilityTariff extends DataClass implements Insertable<UtilityTariff> {
+  final int id;
+  final int utilityTypeId;
+  final int fromPeriod;
+  final int unitPrice;
+  final int fixedFee;
+  final double vatRate;
+  final int vatMode;
+  final bool vatOnFixedFee;
+  const UtilityTariff({
+    required this.id,
+    required this.utilityTypeId,
+    required this.fromPeriod,
+    required this.unitPrice,
+    required this.fixedFee,
+    required this.vatRate,
+    required this.vatMode,
+    required this.vatOnFixedFee,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['utility_type_id'] = Variable<int>(utilityTypeId);
+    map['from_period'] = Variable<int>(fromPeriod);
+    map['unit_price'] = Variable<int>(unitPrice);
+    map['fixed_fee'] = Variable<int>(fixedFee);
+    map['vat_rate'] = Variable<double>(vatRate);
+    map['vat_mode'] = Variable<int>(vatMode);
+    map['vat_on_fixed_fee'] = Variable<bool>(vatOnFixedFee);
+    return map;
+  }
+
+  UtilityTariffsCompanion toCompanion(bool nullToAbsent) {
+    return UtilityTariffsCompanion(
+      id: Value(id),
+      utilityTypeId: Value(utilityTypeId),
+      fromPeriod: Value(fromPeriod),
+      unitPrice: Value(unitPrice),
+      fixedFee: Value(fixedFee),
+      vatRate: Value(vatRate),
+      vatMode: Value(vatMode),
+      vatOnFixedFee: Value(vatOnFixedFee),
+    );
+  }
+
+  factory UtilityTariff.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return UtilityTariff(
+      id: serializer.fromJson<int>(json['id']),
+      utilityTypeId: serializer.fromJson<int>(json['utilityTypeId']),
+      fromPeriod: serializer.fromJson<int>(json['fromPeriod']),
+      unitPrice: serializer.fromJson<int>(json['unitPrice']),
+      fixedFee: serializer.fromJson<int>(json['fixedFee']),
+      vatRate: serializer.fromJson<double>(json['vatRate']),
+      vatMode: serializer.fromJson<int>(json['vatMode']),
+      vatOnFixedFee: serializer.fromJson<bool>(json['vatOnFixedFee']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'utilityTypeId': serializer.toJson<int>(utilityTypeId),
+      'fromPeriod': serializer.toJson<int>(fromPeriod),
+      'unitPrice': serializer.toJson<int>(unitPrice),
+      'fixedFee': serializer.toJson<int>(fixedFee),
+      'vatRate': serializer.toJson<double>(vatRate),
+      'vatMode': serializer.toJson<int>(vatMode),
+      'vatOnFixedFee': serializer.toJson<bool>(vatOnFixedFee),
+    };
+  }
+
+  UtilityTariff copyWith({
+    int? id,
+    int? utilityTypeId,
+    int? fromPeriod,
+    int? unitPrice,
+    int? fixedFee,
+    double? vatRate,
+    int? vatMode,
+    bool? vatOnFixedFee,
+  }) => UtilityTariff(
+    id: id ?? this.id,
+    utilityTypeId: utilityTypeId ?? this.utilityTypeId,
+    fromPeriod: fromPeriod ?? this.fromPeriod,
+    unitPrice: unitPrice ?? this.unitPrice,
+    fixedFee: fixedFee ?? this.fixedFee,
+    vatRate: vatRate ?? this.vatRate,
+    vatMode: vatMode ?? this.vatMode,
+    vatOnFixedFee: vatOnFixedFee ?? this.vatOnFixedFee,
+  );
+  UtilityTariff copyWithCompanion(UtilityTariffsCompanion data) {
+    return UtilityTariff(
+      id: data.id.present ? data.id.value : this.id,
+      utilityTypeId: data.utilityTypeId.present
+          ? data.utilityTypeId.value
+          : this.utilityTypeId,
+      fromPeriod: data.fromPeriod.present
+          ? data.fromPeriod.value
+          : this.fromPeriod,
+      unitPrice: data.unitPrice.present ? data.unitPrice.value : this.unitPrice,
+      fixedFee: data.fixedFee.present ? data.fixedFee.value : this.fixedFee,
+      vatRate: data.vatRate.present ? data.vatRate.value : this.vatRate,
+      vatMode: data.vatMode.present ? data.vatMode.value : this.vatMode,
+      vatOnFixedFee: data.vatOnFixedFee.present
+          ? data.vatOnFixedFee.value
+          : this.vatOnFixedFee,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('UtilityTariff(')
+          ..write('id: $id, ')
+          ..write('utilityTypeId: $utilityTypeId, ')
+          ..write('fromPeriod: $fromPeriod, ')
+          ..write('unitPrice: $unitPrice, ')
+          ..write('fixedFee: $fixedFee, ')
+          ..write('vatRate: $vatRate, ')
+          ..write('vatMode: $vatMode, ')
+          ..write('vatOnFixedFee: $vatOnFixedFee')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    utilityTypeId,
+    fromPeriod,
+    unitPrice,
+    fixedFee,
+    vatRate,
+    vatMode,
+    vatOnFixedFee,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is UtilityTariff &&
+          other.id == this.id &&
+          other.utilityTypeId == this.utilityTypeId &&
+          other.fromPeriod == this.fromPeriod &&
+          other.unitPrice == this.unitPrice &&
+          other.fixedFee == this.fixedFee &&
+          other.vatRate == this.vatRate &&
+          other.vatMode == this.vatMode &&
+          other.vatOnFixedFee == this.vatOnFixedFee);
+}
+
+class UtilityTariffsCompanion extends UpdateCompanion<UtilityTariff> {
+  final Value<int> id;
+  final Value<int> utilityTypeId;
+  final Value<int> fromPeriod;
+  final Value<int> unitPrice;
+  final Value<int> fixedFee;
+  final Value<double> vatRate;
+  final Value<int> vatMode;
+  final Value<bool> vatOnFixedFee;
+  const UtilityTariffsCompanion({
+    this.id = const Value.absent(),
+    this.utilityTypeId = const Value.absent(),
+    this.fromPeriod = const Value.absent(),
+    this.unitPrice = const Value.absent(),
+    this.fixedFee = const Value.absent(),
+    this.vatRate = const Value.absent(),
+    this.vatMode = const Value.absent(),
+    this.vatOnFixedFee = const Value.absent(),
+  });
+  UtilityTariffsCompanion.insert({
+    this.id = const Value.absent(),
+    required int utilityTypeId,
+    required int fromPeriod,
+    required int unitPrice,
+    this.fixedFee = const Value.absent(),
+    this.vatRate = const Value.absent(),
+    this.vatMode = const Value.absent(),
+    this.vatOnFixedFee = const Value.absent(),
+  }) : utilityTypeId = Value(utilityTypeId),
+       fromPeriod = Value(fromPeriod),
+       unitPrice = Value(unitPrice);
+  static Insertable<UtilityTariff> custom({
+    Expression<int>? id,
+    Expression<int>? utilityTypeId,
+    Expression<int>? fromPeriod,
+    Expression<int>? unitPrice,
+    Expression<int>? fixedFee,
+    Expression<double>? vatRate,
+    Expression<int>? vatMode,
+    Expression<bool>? vatOnFixedFee,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (utilityTypeId != null) 'utility_type_id': utilityTypeId,
+      if (fromPeriod != null) 'from_period': fromPeriod,
+      if (unitPrice != null) 'unit_price': unitPrice,
+      if (fixedFee != null) 'fixed_fee': fixedFee,
+      if (vatRate != null) 'vat_rate': vatRate,
+      if (vatMode != null) 'vat_mode': vatMode,
+      if (vatOnFixedFee != null) 'vat_on_fixed_fee': vatOnFixedFee,
+    });
+  }
+
+  UtilityTariffsCompanion copyWith({
+    Value<int>? id,
+    Value<int>? utilityTypeId,
+    Value<int>? fromPeriod,
+    Value<int>? unitPrice,
+    Value<int>? fixedFee,
+    Value<double>? vatRate,
+    Value<int>? vatMode,
+    Value<bool>? vatOnFixedFee,
+  }) {
+    return UtilityTariffsCompanion(
+      id: id ?? this.id,
+      utilityTypeId: utilityTypeId ?? this.utilityTypeId,
+      fromPeriod: fromPeriod ?? this.fromPeriod,
+      unitPrice: unitPrice ?? this.unitPrice,
+      fixedFee: fixedFee ?? this.fixedFee,
+      vatRate: vatRate ?? this.vatRate,
+      vatMode: vatMode ?? this.vatMode,
+      vatOnFixedFee: vatOnFixedFee ?? this.vatOnFixedFee,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (utilityTypeId.present) {
+      map['utility_type_id'] = Variable<int>(utilityTypeId.value);
+    }
+    if (fromPeriod.present) {
+      map['from_period'] = Variable<int>(fromPeriod.value);
+    }
+    if (unitPrice.present) {
+      map['unit_price'] = Variable<int>(unitPrice.value);
+    }
+    if (fixedFee.present) {
+      map['fixed_fee'] = Variable<int>(fixedFee.value);
+    }
+    if (vatRate.present) {
+      map['vat_rate'] = Variable<double>(vatRate.value);
+    }
+    if (vatMode.present) {
+      map['vat_mode'] = Variable<int>(vatMode.value);
+    }
+    if (vatOnFixedFee.present) {
+      map['vat_on_fixed_fee'] = Variable<bool>(vatOnFixedFee.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('UtilityTariffsCompanion(')
+          ..write('id: $id, ')
+          ..write('utilityTypeId: $utilityTypeId, ')
+          ..write('fromPeriod: $fromPeriod, ')
+          ..write('unitPrice: $unitPrice, ')
+          ..write('fixedFee: $fixedFee, ')
+          ..write('vatRate: $vatRate, ')
+          ..write('vatMode: $vatMode, ')
+          ..write('vatOnFixedFee: $vatOnFixedFee')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $MetersTable extends Meters with TableInfo<$MetersTable, Meter> {
   @override
   final GeneratedDatabase attachedDatabase;
@@ -3410,6 +4037,40 @@ class $ContractsTable extends Contracts
     ),
     defaultValue: const Constant(true),
   );
+  static const VerificationMeta _firstRentModeMeta = const VerificationMeta(
+    'firstRentMode',
+  );
+  @override
+  late final GeneratedColumn<int> firstRentMode = GeneratedColumn<int>(
+    'first_rent_mode',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _firstRentAmountMeta = const VerificationMeta(
+    'firstRentAmount',
+  );
+  @override
+  late final GeneratedColumn<int> firstRentAmount = GeneratedColumn<int>(
+    'first_rent_amount',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _firstRentNoteMeta = const VerificationMeta(
+    'firstRentNote',
+  );
+  @override
+  late final GeneratedColumn<String> firstRentNote = GeneratedColumn<String>(
+    'first_rent_note',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _statusMeta = const VerificationMeta('status');
   @override
   late final GeneratedColumn<int> status = GeneratedColumn<int>(
@@ -3489,6 +4150,9 @@ class $ContractsTable extends Contracts
     deposit,
     depositPaid,
     entryProrata,
+    firstRentMode,
+    firstRentAmount,
+    firstRentNote,
     status,
     exitDate,
     exitProrata,
@@ -3588,6 +4252,33 @@ class $ContractsTable extends Contracts
         ),
       );
     }
+    if (data.containsKey('first_rent_mode')) {
+      context.handle(
+        _firstRentModeMeta,
+        firstRentMode.isAcceptableOrUnknown(
+          data['first_rent_mode']!,
+          _firstRentModeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('first_rent_amount')) {
+      context.handle(
+        _firstRentAmountMeta,
+        firstRentAmount.isAcceptableOrUnknown(
+          data['first_rent_amount']!,
+          _firstRentAmountMeta,
+        ),
+      );
+    }
+    if (data.containsKey('first_rent_note')) {
+      context.handle(
+        _firstRentNoteMeta,
+        firstRentNote.isAcceptableOrUnknown(
+          data['first_rent_note']!,
+          _firstRentNoteMeta,
+        ),
+      );
+    }
     if (data.containsKey('status')) {
       context.handle(
         _statusMeta,
@@ -3679,6 +4370,18 @@ class $ContractsTable extends Contracts
         DriftSqlType.bool,
         data['${effectivePrefix}entry_prorata'],
       )!,
+      firstRentMode: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}first_rent_mode'],
+      )!,
+      firstRentAmount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}first_rent_amount'],
+      ),
+      firstRentNote: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}first_rent_note'],
+      ),
       status: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}status'],
@@ -3730,6 +4433,11 @@ class Contract extends DataClass implements Insertable<Contract> {
   /// Mois d'entrée : au prorata des jours (true) ou mois complet (false).
   final bool entryProrata;
 
+  /// Premier loyer (payé à la signature) : 0 = au prorata, 1 = mois complet, 2 = montant forfaitaire.
+  final int firstRentMode;
+  final int? firstRentAmount;
+  final String? firstRentNote;
+
   /// 0 = actif, 1 = terminé.
   final int status;
   final DateTime? exitDate;
@@ -3748,6 +4456,9 @@ class Contract extends DataClass implements Insertable<Contract> {
     required this.deposit,
     required this.depositPaid,
     required this.entryProrata,
+    required this.firstRentMode,
+    this.firstRentAmount,
+    this.firstRentNote,
     required this.status,
     this.exitDate,
     this.exitProrata,
@@ -3770,6 +4481,13 @@ class Contract extends DataClass implements Insertable<Contract> {
     map['deposit'] = Variable<int>(deposit);
     map['deposit_paid'] = Variable<int>(depositPaid);
     map['entry_prorata'] = Variable<bool>(entryProrata);
+    map['first_rent_mode'] = Variable<int>(firstRentMode);
+    if (!nullToAbsent || firstRentAmount != null) {
+      map['first_rent_amount'] = Variable<int>(firstRentAmount);
+    }
+    if (!nullToAbsent || firstRentNote != null) {
+      map['first_rent_note'] = Variable<String>(firstRentNote);
+    }
     map['status'] = Variable<int>(status);
     if (!nullToAbsent || exitDate != null) {
       map['exit_date'] = Variable<DateTime>(exitDate);
@@ -3801,6 +4519,13 @@ class Contract extends DataClass implements Insertable<Contract> {
       deposit: Value(deposit),
       depositPaid: Value(depositPaid),
       entryProrata: Value(entryProrata),
+      firstRentMode: Value(firstRentMode),
+      firstRentAmount: firstRentAmount == null && nullToAbsent
+          ? const Value.absent()
+          : Value(firstRentAmount),
+      firstRentNote: firstRentNote == null && nullToAbsent
+          ? const Value.absent()
+          : Value(firstRentNote),
       status: Value(status),
       exitDate: exitDate == null && nullToAbsent
           ? const Value.absent()
@@ -3834,6 +4559,9 @@ class Contract extends DataClass implements Insertable<Contract> {
       deposit: serializer.fromJson<int>(json['deposit']),
       depositPaid: serializer.fromJson<int>(json['depositPaid']),
       entryProrata: serializer.fromJson<bool>(json['entryProrata']),
+      firstRentMode: serializer.fromJson<int>(json['firstRentMode']),
+      firstRentAmount: serializer.fromJson<int?>(json['firstRentAmount']),
+      firstRentNote: serializer.fromJson<String?>(json['firstRentNote']),
       status: serializer.fromJson<int>(json['status']),
       exitDate: serializer.fromJson<DateTime?>(json['exitDate']),
       exitProrata: serializer.fromJson<bool?>(json['exitProrata']),
@@ -3856,6 +4584,9 @@ class Contract extends DataClass implements Insertable<Contract> {
       'deposit': serializer.toJson<int>(deposit),
       'depositPaid': serializer.toJson<int>(depositPaid),
       'entryProrata': serializer.toJson<bool>(entryProrata),
+      'firstRentMode': serializer.toJson<int>(firstRentMode),
+      'firstRentAmount': serializer.toJson<int?>(firstRentAmount),
+      'firstRentNote': serializer.toJson<String?>(firstRentNote),
       'status': serializer.toJson<int>(status),
       'exitDate': serializer.toJson<DateTime?>(exitDate),
       'exitProrata': serializer.toJson<bool?>(exitProrata),
@@ -3876,6 +4607,9 @@ class Contract extends DataClass implements Insertable<Contract> {
     int? deposit,
     int? depositPaid,
     bool? entryProrata,
+    int? firstRentMode,
+    Value<int?> firstRentAmount = const Value.absent(),
+    Value<String?> firstRentNote = const Value.absent(),
     int? status,
     Value<DateTime?> exitDate = const Value.absent(),
     Value<bool?> exitProrata = const Value.absent(),
@@ -3895,6 +4629,13 @@ class Contract extends DataClass implements Insertable<Contract> {
     deposit: deposit ?? this.deposit,
     depositPaid: depositPaid ?? this.depositPaid,
     entryProrata: entryProrata ?? this.entryProrata,
+    firstRentMode: firstRentMode ?? this.firstRentMode,
+    firstRentAmount: firstRentAmount.present
+        ? firstRentAmount.value
+        : this.firstRentAmount,
+    firstRentNote: firstRentNote.present
+        ? firstRentNote.value
+        : this.firstRentNote,
     status: status ?? this.status,
     exitDate: exitDate.present ? exitDate.value : this.exitDate,
     exitProrata: exitProrata.present ? exitProrata.value : this.exitProrata,
@@ -3924,6 +4665,15 @@ class Contract extends DataClass implements Insertable<Contract> {
       entryProrata: data.entryProrata.present
           ? data.entryProrata.value
           : this.entryProrata,
+      firstRentMode: data.firstRentMode.present
+          ? data.firstRentMode.value
+          : this.firstRentMode,
+      firstRentAmount: data.firstRentAmount.present
+          ? data.firstRentAmount.value
+          : this.firstRentAmount,
+      firstRentNote: data.firstRentNote.present
+          ? data.firstRentNote.value
+          : this.firstRentNote,
       status: data.status.present ? data.status.value : this.status,
       exitDate: data.exitDate.present ? data.exitDate.value : this.exitDate,
       exitProrata: data.exitProrata.present
@@ -3950,6 +4700,9 @@ class Contract extends DataClass implements Insertable<Contract> {
           ..write('deposit: $deposit, ')
           ..write('depositPaid: $depositPaid, ')
           ..write('entryProrata: $entryProrata, ')
+          ..write('firstRentMode: $firstRentMode, ')
+          ..write('firstRentAmount: $firstRentAmount, ')
+          ..write('firstRentNote: $firstRentNote, ')
           ..write('status: $status, ')
           ..write('exitDate: $exitDate, ')
           ..write('exitProrata: $exitProrata, ')
@@ -3972,6 +4725,9 @@ class Contract extends DataClass implements Insertable<Contract> {
     deposit,
     depositPaid,
     entryProrata,
+    firstRentMode,
+    firstRentAmount,
+    firstRentNote,
     status,
     exitDate,
     exitProrata,
@@ -3993,6 +4749,9 @@ class Contract extends DataClass implements Insertable<Contract> {
           other.deposit == this.deposit &&
           other.depositPaid == this.depositPaid &&
           other.entryProrata == this.entryProrata &&
+          other.firstRentMode == this.firstRentMode &&
+          other.firstRentAmount == this.firstRentAmount &&
+          other.firstRentNote == this.firstRentNote &&
           other.status == this.status &&
           other.exitDate == this.exitDate &&
           other.exitProrata == this.exitProrata &&
@@ -4012,6 +4771,9 @@ class ContractsCompanion extends UpdateCompanion<Contract> {
   final Value<int> deposit;
   final Value<int> depositPaid;
   final Value<bool> entryProrata;
+  final Value<int> firstRentMode;
+  final Value<int?> firstRentAmount;
+  final Value<String?> firstRentNote;
   final Value<int> status;
   final Value<DateTime?> exitDate;
   final Value<bool?> exitProrata;
@@ -4029,6 +4791,9 @@ class ContractsCompanion extends UpdateCompanion<Contract> {
     this.deposit = const Value.absent(),
     this.depositPaid = const Value.absent(),
     this.entryProrata = const Value.absent(),
+    this.firstRentMode = const Value.absent(),
+    this.firstRentAmount = const Value.absent(),
+    this.firstRentNote = const Value.absent(),
     this.status = const Value.absent(),
     this.exitDate = const Value.absent(),
     this.exitProrata = const Value.absent(),
@@ -4047,6 +4812,9 @@ class ContractsCompanion extends UpdateCompanion<Contract> {
     this.deposit = const Value.absent(),
     this.depositPaid = const Value.absent(),
     this.entryProrata = const Value.absent(),
+    this.firstRentMode = const Value.absent(),
+    this.firstRentAmount = const Value.absent(),
+    this.firstRentNote = const Value.absent(),
     this.status = const Value.absent(),
     this.exitDate = const Value.absent(),
     this.exitProrata = const Value.absent(),
@@ -4068,6 +4836,9 @@ class ContractsCompanion extends UpdateCompanion<Contract> {
     Expression<int>? deposit,
     Expression<int>? depositPaid,
     Expression<bool>? entryProrata,
+    Expression<int>? firstRentMode,
+    Expression<int>? firstRentAmount,
+    Expression<String>? firstRentNote,
     Expression<int>? status,
     Expression<DateTime>? exitDate,
     Expression<bool>? exitProrata,
@@ -4086,6 +4857,9 @@ class ContractsCompanion extends UpdateCompanion<Contract> {
       if (deposit != null) 'deposit': deposit,
       if (depositPaid != null) 'deposit_paid': depositPaid,
       if (entryProrata != null) 'entry_prorata': entryProrata,
+      if (firstRentMode != null) 'first_rent_mode': firstRentMode,
+      if (firstRentAmount != null) 'first_rent_amount': firstRentAmount,
+      if (firstRentNote != null) 'first_rent_note': firstRentNote,
       if (status != null) 'status': status,
       if (exitDate != null) 'exit_date': exitDate,
       if (exitProrata != null) 'exit_prorata': exitProrata,
@@ -4106,6 +4880,9 @@ class ContractsCompanion extends UpdateCompanion<Contract> {
     Value<int>? deposit,
     Value<int>? depositPaid,
     Value<bool>? entryProrata,
+    Value<int>? firstRentMode,
+    Value<int?>? firstRentAmount,
+    Value<String?>? firstRentNote,
     Value<int>? status,
     Value<DateTime?>? exitDate,
     Value<bool?>? exitProrata,
@@ -4124,6 +4901,9 @@ class ContractsCompanion extends UpdateCompanion<Contract> {
       deposit: deposit ?? this.deposit,
       depositPaid: depositPaid ?? this.depositPaid,
       entryProrata: entryProrata ?? this.entryProrata,
+      firstRentMode: firstRentMode ?? this.firstRentMode,
+      firstRentAmount: firstRentAmount ?? this.firstRentAmount,
+      firstRentNote: firstRentNote ?? this.firstRentNote,
       status: status ?? this.status,
       exitDate: exitDate ?? this.exitDate,
       exitProrata: exitProrata ?? this.exitProrata,
@@ -4166,6 +4946,15 @@ class ContractsCompanion extends UpdateCompanion<Contract> {
     if (entryProrata.present) {
       map['entry_prorata'] = Variable<bool>(entryProrata.value);
     }
+    if (firstRentMode.present) {
+      map['first_rent_mode'] = Variable<int>(firstRentMode.value);
+    }
+    if (firstRentAmount.present) {
+      map['first_rent_amount'] = Variable<int>(firstRentAmount.value);
+    }
+    if (firstRentNote.present) {
+      map['first_rent_note'] = Variable<String>(firstRentNote.value);
+    }
     if (status.present) {
       map['status'] = Variable<int>(status.value);
     }
@@ -4200,6 +4989,9 @@ class ContractsCompanion extends UpdateCompanion<Contract> {
           ..write('deposit: $deposit, ')
           ..write('depositPaid: $depositPaid, ')
           ..write('entryProrata: $entryProrata, ')
+          ..write('firstRentMode: $firstRentMode, ')
+          ..write('firstRentAmount: $firstRentAmount, ')
+          ..write('firstRentNote: $firstRentNote, ')
           ..write('status: $status, ')
           ..write('exitDate: $exitDate, ')
           ..write('exitProrata: $exitProrata, ')
@@ -4626,6 +5418,311 @@ class ContractServicesCompanion extends UpdateCompanion<ContractService> {
           ..write('quantity: $quantity, ')
           ..write('includedQuantity: $includedQuantity, ')
           ..write('unitPrice: $unitPrice')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ContractRentsTable extends ContractRents
+    with TableInfo<$ContractRentsTable, ContractRent> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ContractRentsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _contractIdMeta = const VerificationMeta(
+    'contractId',
+  );
+  @override
+  late final GeneratedColumn<int> contractId = GeneratedColumn<int>(
+    'contract_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES contracts (id)',
+    ),
+  );
+  static const VerificationMeta _fromPeriodMeta = const VerificationMeta(
+    'fromPeriod',
+  );
+  @override
+  late final GeneratedColumn<int> fromPeriod = GeneratedColumn<int>(
+    'from_period',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _rentMeta = const VerificationMeta('rent');
+  @override
+  late final GeneratedColumn<int> rent = GeneratedColumn<int>(
+    'rent',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, contractId, fromPeriod, rent];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'contract_rents';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ContractRent> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('contract_id')) {
+      context.handle(
+        _contractIdMeta,
+        contractId.isAcceptableOrUnknown(data['contract_id']!, _contractIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_contractIdMeta);
+    }
+    if (data.containsKey('from_period')) {
+      context.handle(
+        _fromPeriodMeta,
+        fromPeriod.isAcceptableOrUnknown(data['from_period']!, _fromPeriodMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_fromPeriodMeta);
+    }
+    if (data.containsKey('rent')) {
+      context.handle(
+        _rentMeta,
+        rent.isAcceptableOrUnknown(data['rent']!, _rentMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_rentMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ContractRent map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ContractRent(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      contractId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}contract_id'],
+      )!,
+      fromPeriod: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}from_period'],
+      )!,
+      rent: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}rent'],
+      )!,
+    );
+  }
+
+  @override
+  $ContractRentsTable createAlias(String alias) {
+    return $ContractRentsTable(attachedDatabase, alias);
+  }
+}
+
+class ContractRent extends DataClass implements Insertable<ContractRent> {
+  final int id;
+  final int contractId;
+  final int fromPeriod;
+  final int rent;
+  const ContractRent({
+    required this.id,
+    required this.contractId,
+    required this.fromPeriod,
+    required this.rent,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['contract_id'] = Variable<int>(contractId);
+    map['from_period'] = Variable<int>(fromPeriod);
+    map['rent'] = Variable<int>(rent);
+    return map;
+  }
+
+  ContractRentsCompanion toCompanion(bool nullToAbsent) {
+    return ContractRentsCompanion(
+      id: Value(id),
+      contractId: Value(contractId),
+      fromPeriod: Value(fromPeriod),
+      rent: Value(rent),
+    );
+  }
+
+  factory ContractRent.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ContractRent(
+      id: serializer.fromJson<int>(json['id']),
+      contractId: serializer.fromJson<int>(json['contractId']),
+      fromPeriod: serializer.fromJson<int>(json['fromPeriod']),
+      rent: serializer.fromJson<int>(json['rent']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'contractId': serializer.toJson<int>(contractId),
+      'fromPeriod': serializer.toJson<int>(fromPeriod),
+      'rent': serializer.toJson<int>(rent),
+    };
+  }
+
+  ContractRent copyWith({
+    int? id,
+    int? contractId,
+    int? fromPeriod,
+    int? rent,
+  }) => ContractRent(
+    id: id ?? this.id,
+    contractId: contractId ?? this.contractId,
+    fromPeriod: fromPeriod ?? this.fromPeriod,
+    rent: rent ?? this.rent,
+  );
+  ContractRent copyWithCompanion(ContractRentsCompanion data) {
+    return ContractRent(
+      id: data.id.present ? data.id.value : this.id,
+      contractId: data.contractId.present
+          ? data.contractId.value
+          : this.contractId,
+      fromPeriod: data.fromPeriod.present
+          ? data.fromPeriod.value
+          : this.fromPeriod,
+      rent: data.rent.present ? data.rent.value : this.rent,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ContractRent(')
+          ..write('id: $id, ')
+          ..write('contractId: $contractId, ')
+          ..write('fromPeriod: $fromPeriod, ')
+          ..write('rent: $rent')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, contractId, fromPeriod, rent);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ContractRent &&
+          other.id == this.id &&
+          other.contractId == this.contractId &&
+          other.fromPeriod == this.fromPeriod &&
+          other.rent == this.rent);
+}
+
+class ContractRentsCompanion extends UpdateCompanion<ContractRent> {
+  final Value<int> id;
+  final Value<int> contractId;
+  final Value<int> fromPeriod;
+  final Value<int> rent;
+  const ContractRentsCompanion({
+    this.id = const Value.absent(),
+    this.contractId = const Value.absent(),
+    this.fromPeriod = const Value.absent(),
+    this.rent = const Value.absent(),
+  });
+  ContractRentsCompanion.insert({
+    this.id = const Value.absent(),
+    required int contractId,
+    required int fromPeriod,
+    required int rent,
+  }) : contractId = Value(contractId),
+       fromPeriod = Value(fromPeriod),
+       rent = Value(rent);
+  static Insertable<ContractRent> custom({
+    Expression<int>? id,
+    Expression<int>? contractId,
+    Expression<int>? fromPeriod,
+    Expression<int>? rent,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (contractId != null) 'contract_id': contractId,
+      if (fromPeriod != null) 'from_period': fromPeriod,
+      if (rent != null) 'rent': rent,
+    });
+  }
+
+  ContractRentsCompanion copyWith({
+    Value<int>? id,
+    Value<int>? contractId,
+    Value<int>? fromPeriod,
+    Value<int>? rent,
+  }) {
+    return ContractRentsCompanion(
+      id: id ?? this.id,
+      contractId: contractId ?? this.contractId,
+      fromPeriod: fromPeriod ?? this.fromPeriod,
+      rent: rent ?? this.rent,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (contractId.present) {
+      map['contract_id'] = Variable<int>(contractId.value);
+    }
+    if (fromPeriod.present) {
+      map['from_period'] = Variable<int>(fromPeriod.value);
+    }
+    if (rent.present) {
+      map['rent'] = Variable<int>(rent.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ContractRentsCompanion(')
+          ..write('id: $id, ')
+          ..write('contractId: $contractId, ')
+          ..write('fromPeriod: $fromPeriod, ')
+          ..write('rent: $rent')
           ..write(')'))
         .toString();
   }
@@ -8871,12 +9968,14 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $ApartmentsTable apartments = $ApartmentsTable(this);
   late final $TenantsTable tenants = $TenantsTable(this);
   late final $UtilityTypesTable utilityTypes = $UtilityTypesTable(this);
+  late final $UtilityTariffsTable utilityTariffs = $UtilityTariffsTable(this);
   late final $MetersTable meters = $MetersTable(this);
   late final $ServiceTypesTable serviceTypes = $ServiceTypesTable(this);
   late final $ContractsTable contracts = $ContractsTable(this);
   late final $ContractServicesTable contractServices = $ContractServicesTable(
     this,
   );
+  late final $ContractRentsTable contractRents = $ContractRentsTable(this);
   late final $ContractBenefitsTable contractBenefits = $ContractBenefitsTable(
     this,
   );
@@ -8899,10 +9998,12 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     apartments,
     tenants,
     utilityTypes,
+    utilityTariffs,
     meters,
     serviceTypes,
     contracts,
     contractServices,
+    contractRents,
     contractBenefits,
     readings,
     invoices,
@@ -9225,6 +10326,7 @@ typedef $$BuildingsTableCreateCompanionBuilder =
       required String name,
       Value<String?> address,
       Value<String?> notes,
+      Value<int> latePenalty,
     });
 typedef $$BuildingsTableUpdateCompanionBuilder =
     BuildingsCompanion Function({
@@ -9233,6 +10335,7 @@ typedef $$BuildingsTableUpdateCompanionBuilder =
       Value<String> name,
       Value<String?> address,
       Value<String?> notes,
+      Value<int> latePenalty,
     });
 
 final class $$BuildingsTableReferences
@@ -9302,6 +10405,11 @@ class $$BuildingsTableFilterComposer
 
   ColumnFilters<String> get notes => $composableBuilder(
     column: $table.notes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get latePenalty => $composableBuilder(
+    column: $table.latePenalty,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -9383,6 +10491,11 @@ class $$BuildingsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get latePenalty => $composableBuilder(
+    column: $table.latePenalty,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$OwnersTableOrderingComposer get ownerId {
     final $$OwnersTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -9427,6 +10540,11 @@ class $$BuildingsTableAnnotationComposer
 
   GeneratedColumn<String> get notes =>
       $composableBuilder(column: $table.notes, builder: (column) => column);
+
+  GeneratedColumn<int> get latePenalty => $composableBuilder(
+    column: $table.latePenalty,
+    builder: (column) => column,
+  );
 
   $$OwnersTableAnnotationComposer get ownerId {
     final $$OwnersTableAnnotationComposer composer = $composerBuilder(
@@ -9510,12 +10628,14 @@ class $$BuildingsTableTableManager
                 Value<String> name = const Value.absent(),
                 Value<String?> address = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
+                Value<int> latePenalty = const Value.absent(),
               }) => BuildingsCompanion(
                 id: id,
                 ownerId: ownerId,
                 name: name,
                 address: address,
                 notes: notes,
+                latePenalty: latePenalty,
               ),
           createCompanionCallback:
               ({
@@ -9524,12 +10644,14 @@ class $$BuildingsTableTableManager
                 required String name,
                 Value<String?> address = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
+                Value<int> latePenalty = const Value.absent(),
               }) => BuildingsCompanion.insert(
                 id: id,
                 ownerId: ownerId,
                 name: name,
                 address: address,
                 notes: notes,
+                latePenalty: latePenalty,
               ),
           withReferenceMapper: (p0) => p0
               .map(
@@ -9628,6 +10750,7 @@ typedef $$ApartmentsTableCreateCompanionBuilder =
       Value<int> rent,
       Value<int> deposit,
       Value<bool> archived,
+      Value<int?> latePenalty,
     });
 typedef $$ApartmentsTableUpdateCompanionBuilder =
     ApartmentsCompanion Function({
@@ -9639,6 +10762,7 @@ typedef $$ApartmentsTableUpdateCompanionBuilder =
       Value<int> rent,
       Value<int> deposit,
       Value<bool> archived,
+      Value<int?> latePenalty,
     });
 
 final class $$ApartmentsTableReferences
@@ -9743,6 +10867,11 @@ class $$ApartmentsTableFilterComposer
 
   ColumnFilters<bool> get archived => $composableBuilder(
     column: $table.archived,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get latePenalty => $composableBuilder(
+    column: $table.latePenalty,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -9864,6 +10993,11 @@ class $$ApartmentsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get latePenalty => $composableBuilder(
+    column: $table.latePenalty,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$BuildingsTableOrderingComposer get buildingId {
     final $$BuildingsTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -9919,6 +11053,11 @@ class $$ApartmentsTableAnnotationComposer
 
   GeneratedColumn<bool> get archived =>
       $composableBuilder(column: $table.archived, builder: (column) => column);
+
+  GeneratedColumn<int> get latePenalty => $composableBuilder(
+    column: $table.latePenalty,
+    builder: (column) => column,
+  );
 
   $$BuildingsTableAnnotationComposer get buildingId {
     final $$BuildingsTableAnnotationComposer composer = $composerBuilder(
@@ -10034,6 +11173,7 @@ class $$ApartmentsTableTableManager
                 Value<int> rent = const Value.absent(),
                 Value<int> deposit = const Value.absent(),
                 Value<bool> archived = const Value.absent(),
+                Value<int?> latePenalty = const Value.absent(),
               }) => ApartmentsCompanion(
                 id: id,
                 buildingId: buildingId,
@@ -10043,6 +11183,7 @@ class $$ApartmentsTableTableManager
                 rent: rent,
                 deposit: deposit,
                 archived: archived,
+                latePenalty: latePenalty,
               ),
           createCompanionCallback:
               ({
@@ -10054,6 +11195,7 @@ class $$ApartmentsTableTableManager
                 Value<int> rent = const Value.absent(),
                 Value<int> deposit = const Value.absent(),
                 Value<bool> archived = const Value.absent(),
+                Value<int?> latePenalty = const Value.absent(),
               }) => ApartmentsCompanion.insert(
                 id: id,
                 buildingId: buildingId,
@@ -10063,6 +11205,7 @@ class $$ApartmentsTableTableManager
                 rent: rent,
                 deposit: deposit,
                 archived: archived,
+                latePenalty: latePenalty,
               ),
           withReferenceMapper: (p0) => p0
               .map(
@@ -10568,6 +11711,27 @@ final class $$UtilityTypesTableReferences
     extends BaseReferences<_$AppDatabase, $UtilityTypesTable, UtilityType> {
   $$UtilityTypesTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
+  static MultiTypedResultKey<$UtilityTariffsTable, List<UtilityTariff>>
+  _utilityTariffsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.utilityTariffs,
+    aliasName: $_aliasNameGenerator(
+      db.utilityTypes.id,
+      db.utilityTariffs.utilityTypeId,
+    ),
+  );
+
+  $$UtilityTariffsTableProcessedTableManager get utilityTariffsRefs {
+    final manager = $$UtilityTariffsTableTableManager(
+      $_db,
+      $_db.utilityTariffs,
+    ).filter((f) => f.utilityTypeId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_utilityTariffsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
   static MultiTypedResultKey<$MetersTable, List<Meter>> _metersRefsTable(
     _$AppDatabase db,
   ) => MultiTypedResultKey.fromTable(
@@ -10682,6 +11846,31 @@ class $$UtilityTypesTableFilterComposer
     column: $table.active,
     builder: (column) => ColumnFilters(column),
   );
+
+  Expression<bool> utilityTariffsRefs(
+    Expression<bool> Function($$UtilityTariffsTableFilterComposer f) f,
+  ) {
+    final $$UtilityTariffsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.utilityTariffs,
+      getReferencedColumn: (t) => t.utilityTypeId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UtilityTariffsTableFilterComposer(
+            $db: $db,
+            $table: $db.utilityTariffs,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 
   Expression<bool> metersRefs(
     Expression<bool> Function($$MetersTableFilterComposer f) f,
@@ -10855,6 +12044,31 @@ class $$UtilityTypesTableAnnotationComposer
   GeneratedColumn<bool> get active =>
       $composableBuilder(column: $table.active, builder: (column) => column);
 
+  Expression<T> utilityTariffsRefs<T extends Object>(
+    Expression<T> Function($$UtilityTariffsTableAnnotationComposer a) f,
+  ) {
+    final $$UtilityTariffsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.utilityTariffs,
+      getReferencedColumn: (t) => t.utilityTypeId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UtilityTariffsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.utilityTariffs,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
   Expression<T> metersRefs<T extends Object>(
     Expression<T> Function($$MetersTableAnnotationComposer a) f,
   ) {
@@ -10919,7 +12133,11 @@ class $$UtilityTypesTableTableManager
           $$UtilityTypesTableUpdateCompanionBuilder,
           (UtilityType, $$UtilityTypesTableReferences),
           UtilityType,
-          PrefetchHooks Function({bool metersRefs, bool contractBenefitsRefs})
+          PrefetchHooks Function({
+            bool utilityTariffsRefs,
+            bool metersRefs,
+            bool contractBenefitsRefs,
+          })
         > {
   $$UtilityTypesTableTableManager(_$AppDatabase db, $UtilityTypesTable table)
     : super(
@@ -10997,16 +12215,42 @@ class $$UtilityTypesTableTableManager
               )
               .toList(),
           prefetchHooksCallback:
-              ({metersRefs = false, contractBenefitsRefs = false}) {
+              ({
+                utilityTariffsRefs = false,
+                metersRefs = false,
+                contractBenefitsRefs = false,
+              }) {
                 return PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [
+                    if (utilityTariffsRefs) db.utilityTariffs,
                     if (metersRefs) db.meters,
                     if (contractBenefitsRefs) db.contractBenefits,
                   ],
                   addJoins: null,
                   getPrefetchedDataCallback: (items) async {
                     return [
+                      if (utilityTariffsRefs)
+                        await $_getPrefetchedData<
+                          UtilityType,
+                          $UtilityTypesTable,
+                          UtilityTariff
+                        >(
+                          currentTable: table,
+                          referencedTable: $$UtilityTypesTableReferences
+                              ._utilityTariffsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$UtilityTypesTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).utilityTariffsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.utilityTypeId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                       if (metersRefs)
                         await $_getPrefetchedData<
                           UtilityType,
@@ -11069,7 +12313,395 @@ typedef $$UtilityTypesTableProcessedTableManager =
       $$UtilityTypesTableUpdateCompanionBuilder,
       (UtilityType, $$UtilityTypesTableReferences),
       UtilityType,
-      PrefetchHooks Function({bool metersRefs, bool contractBenefitsRefs})
+      PrefetchHooks Function({
+        bool utilityTariffsRefs,
+        bool metersRefs,
+        bool contractBenefitsRefs,
+      })
+    >;
+typedef $$UtilityTariffsTableCreateCompanionBuilder =
+    UtilityTariffsCompanion Function({
+      Value<int> id,
+      required int utilityTypeId,
+      required int fromPeriod,
+      required int unitPrice,
+      Value<int> fixedFee,
+      Value<double> vatRate,
+      Value<int> vatMode,
+      Value<bool> vatOnFixedFee,
+    });
+typedef $$UtilityTariffsTableUpdateCompanionBuilder =
+    UtilityTariffsCompanion Function({
+      Value<int> id,
+      Value<int> utilityTypeId,
+      Value<int> fromPeriod,
+      Value<int> unitPrice,
+      Value<int> fixedFee,
+      Value<double> vatRate,
+      Value<int> vatMode,
+      Value<bool> vatOnFixedFee,
+    });
+
+final class $$UtilityTariffsTableReferences
+    extends BaseReferences<_$AppDatabase, $UtilityTariffsTable, UtilityTariff> {
+  $$UtilityTariffsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $UtilityTypesTable _utilityTypeIdTable(_$AppDatabase db) =>
+      db.utilityTypes.createAlias(
+        $_aliasNameGenerator(
+          db.utilityTariffs.utilityTypeId,
+          db.utilityTypes.id,
+        ),
+      );
+
+  $$UtilityTypesTableProcessedTableManager get utilityTypeId {
+    final $_column = $_itemColumn<int>('utility_type_id')!;
+
+    final manager = $$UtilityTypesTableTableManager(
+      $_db,
+      $_db.utilityTypes,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_utilityTypeIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$UtilityTariffsTableFilterComposer
+    extends Composer<_$AppDatabase, $UtilityTariffsTable> {
+  $$UtilityTariffsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get fromPeriod => $composableBuilder(
+    column: $table.fromPeriod,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get unitPrice => $composableBuilder(
+    column: $table.unitPrice,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get fixedFee => $composableBuilder(
+    column: $table.fixedFee,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get vatRate => $composableBuilder(
+    column: $table.vatRate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get vatMode => $composableBuilder(
+    column: $table.vatMode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get vatOnFixedFee => $composableBuilder(
+    column: $table.vatOnFixedFee,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$UtilityTypesTableFilterComposer get utilityTypeId {
+    final $$UtilityTypesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.utilityTypeId,
+      referencedTable: $db.utilityTypes,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UtilityTypesTableFilterComposer(
+            $db: $db,
+            $table: $db.utilityTypes,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$UtilityTariffsTableOrderingComposer
+    extends Composer<_$AppDatabase, $UtilityTariffsTable> {
+  $$UtilityTariffsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get fromPeriod => $composableBuilder(
+    column: $table.fromPeriod,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get unitPrice => $composableBuilder(
+    column: $table.unitPrice,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get fixedFee => $composableBuilder(
+    column: $table.fixedFee,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get vatRate => $composableBuilder(
+    column: $table.vatRate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get vatMode => $composableBuilder(
+    column: $table.vatMode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get vatOnFixedFee => $composableBuilder(
+    column: $table.vatOnFixedFee,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$UtilityTypesTableOrderingComposer get utilityTypeId {
+    final $$UtilityTypesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.utilityTypeId,
+      referencedTable: $db.utilityTypes,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UtilityTypesTableOrderingComposer(
+            $db: $db,
+            $table: $db.utilityTypes,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$UtilityTariffsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $UtilityTariffsTable> {
+  $$UtilityTariffsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get fromPeriod => $composableBuilder(
+    column: $table.fromPeriod,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get unitPrice =>
+      $composableBuilder(column: $table.unitPrice, builder: (column) => column);
+
+  GeneratedColumn<int> get fixedFee =>
+      $composableBuilder(column: $table.fixedFee, builder: (column) => column);
+
+  GeneratedColumn<double> get vatRate =>
+      $composableBuilder(column: $table.vatRate, builder: (column) => column);
+
+  GeneratedColumn<int> get vatMode =>
+      $composableBuilder(column: $table.vatMode, builder: (column) => column);
+
+  GeneratedColumn<bool> get vatOnFixedFee => $composableBuilder(
+    column: $table.vatOnFixedFee,
+    builder: (column) => column,
+  );
+
+  $$UtilityTypesTableAnnotationComposer get utilityTypeId {
+    final $$UtilityTypesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.utilityTypeId,
+      referencedTable: $db.utilityTypes,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UtilityTypesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.utilityTypes,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$UtilityTariffsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $UtilityTariffsTable,
+          UtilityTariff,
+          $$UtilityTariffsTableFilterComposer,
+          $$UtilityTariffsTableOrderingComposer,
+          $$UtilityTariffsTableAnnotationComposer,
+          $$UtilityTariffsTableCreateCompanionBuilder,
+          $$UtilityTariffsTableUpdateCompanionBuilder,
+          (UtilityTariff, $$UtilityTariffsTableReferences),
+          UtilityTariff,
+          PrefetchHooks Function({bool utilityTypeId})
+        > {
+  $$UtilityTariffsTableTableManager(
+    _$AppDatabase db,
+    $UtilityTariffsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$UtilityTariffsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$UtilityTariffsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$UtilityTariffsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> utilityTypeId = const Value.absent(),
+                Value<int> fromPeriod = const Value.absent(),
+                Value<int> unitPrice = const Value.absent(),
+                Value<int> fixedFee = const Value.absent(),
+                Value<double> vatRate = const Value.absent(),
+                Value<int> vatMode = const Value.absent(),
+                Value<bool> vatOnFixedFee = const Value.absent(),
+              }) => UtilityTariffsCompanion(
+                id: id,
+                utilityTypeId: utilityTypeId,
+                fromPeriod: fromPeriod,
+                unitPrice: unitPrice,
+                fixedFee: fixedFee,
+                vatRate: vatRate,
+                vatMode: vatMode,
+                vatOnFixedFee: vatOnFixedFee,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int utilityTypeId,
+                required int fromPeriod,
+                required int unitPrice,
+                Value<int> fixedFee = const Value.absent(),
+                Value<double> vatRate = const Value.absent(),
+                Value<int> vatMode = const Value.absent(),
+                Value<bool> vatOnFixedFee = const Value.absent(),
+              }) => UtilityTariffsCompanion.insert(
+                id: id,
+                utilityTypeId: utilityTypeId,
+                fromPeriod: fromPeriod,
+                unitPrice: unitPrice,
+                fixedFee: fixedFee,
+                vatRate: vatRate,
+                vatMode: vatMode,
+                vatOnFixedFee: vatOnFixedFee,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$UtilityTariffsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({utilityTypeId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (utilityTypeId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.utilityTypeId,
+                                referencedTable: $$UtilityTariffsTableReferences
+                                    ._utilityTypeIdTable(db),
+                                referencedColumn:
+                                    $$UtilityTariffsTableReferences
+                                        ._utilityTypeIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$UtilityTariffsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $UtilityTariffsTable,
+      UtilityTariff,
+      $$UtilityTariffsTableFilterComposer,
+      $$UtilityTariffsTableOrderingComposer,
+      $$UtilityTariffsTableAnnotationComposer,
+      $$UtilityTariffsTableCreateCompanionBuilder,
+      $$UtilityTariffsTableUpdateCompanionBuilder,
+      (UtilityTariff, $$UtilityTariffsTableReferences),
+      UtilityTariff,
+      PrefetchHooks Function({bool utilityTypeId})
     >;
 typedef $$MetersTableCreateCompanionBuilder =
     MetersCompanion Function({
@@ -12030,6 +13662,9 @@ typedef $$ContractsTableCreateCompanionBuilder =
       Value<int> deposit,
       Value<int> depositPaid,
       Value<bool> entryProrata,
+      Value<int> firstRentMode,
+      Value<int?> firstRentAmount,
+      Value<String?> firstRentNote,
       Value<int> status,
       Value<DateTime?> exitDate,
       Value<bool?> exitProrata,
@@ -12049,6 +13684,9 @@ typedef $$ContractsTableUpdateCompanionBuilder =
       Value<int> deposit,
       Value<int> depositPaid,
       Value<bool> entryProrata,
+      Value<int> firstRentMode,
+      Value<int?> firstRentAmount,
+      Value<String?> firstRentNote,
       Value<int> status,
       Value<DateTime?> exitDate,
       Value<bool?> exitProrata,
@@ -12115,6 +13753,27 @@ final class $$ContractsTableReferences
     final cache = $_typedResult.readTableOrNull(
       _contractServicesRefsTable($_db),
     );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$ContractRentsTable, List<ContractRent>>
+  _contractRentsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.contractRents,
+    aliasName: $_aliasNameGenerator(
+      db.contracts.id,
+      db.contractRents.contractId,
+    ),
+  );
+
+  $$ContractRentsTableProcessedTableManager get contractRentsRefs {
+    final manager = $$ContractRentsTableTableManager(
+      $_db,
+      $_db.contractRents,
+    ).filter((f) => f.contractId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_contractRentsRefsTable($_db));
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
     );
@@ -12268,6 +13927,21 @@ class $$ContractsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<int> get firstRentMode => $composableBuilder(
+    column: $table.firstRentMode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get firstRentAmount => $composableBuilder(
+    column: $table.firstRentAmount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get firstRentNote => $composableBuilder(
+    column: $table.firstRentNote,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<int> get status => $composableBuilder(
     column: $table.status,
     builder: (column) => ColumnFilters(column),
@@ -12360,6 +14034,31 @@ class $$ContractsTableFilterComposer
           }) => $$ContractServicesTableFilterComposer(
             $db: $db,
             $table: $db.contractServices,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> contractRentsRefs(
+    Expression<bool> Function($$ContractRentsTableFilterComposer f) f,
+  ) {
+    final $$ContractRentsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.contractRents,
+      getReferencedColumn: (t) => t.contractId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContractRentsTableFilterComposer(
+            $db: $db,
+            $table: $db.contractRents,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -12544,6 +14243,21 @@ class $$ContractsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get firstRentMode => $composableBuilder(
+    column: $table.firstRentMode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get firstRentAmount => $composableBuilder(
+    column: $table.firstRentAmount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get firstRentNote => $composableBuilder(
+    column: $table.firstRentNote,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get status => $composableBuilder(
     column: $table.status,
     builder: (column) => ColumnOrderings(column),
@@ -12662,6 +14376,21 @@ class $$ContractsTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<int> get firstRentMode => $composableBuilder(
+    column: $table.firstRentMode,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get firstRentAmount => $composableBuilder(
+    column: $table.firstRentAmount,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get firstRentNote => $composableBuilder(
+    column: $table.firstRentNote,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<int> get status =>
       $composableBuilder(column: $table.status, builder: (column) => column);
 
@@ -12746,6 +14475,31 @@ class $$ContractsTableAnnotationComposer
           }) => $$ContractServicesTableAnnotationComposer(
             $db: $db,
             $table: $db.contractServices,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<T> contractRentsRefs<T extends Object>(
+    Expression<T> Function($$ContractRentsTableAnnotationComposer a) f,
+  ) {
+    final $$ContractRentsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.contractRents,
+      getReferencedColumn: (t) => t.contractId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContractRentsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.contractRents,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -12898,6 +14652,7 @@ class $$ContractsTableTableManager
             bool apartmentId,
             bool tenantId,
             bool contractServicesRefs,
+            bool contractRentsRefs,
             bool contractBenefitsRefs,
             bool readingsRefs,
             bool invoicesRefs,
@@ -12928,6 +14683,9 @@ class $$ContractsTableTableManager
                 Value<int> deposit = const Value.absent(),
                 Value<int> depositPaid = const Value.absent(),
                 Value<bool> entryProrata = const Value.absent(),
+                Value<int> firstRentMode = const Value.absent(),
+                Value<int?> firstRentAmount = const Value.absent(),
+                Value<String?> firstRentNote = const Value.absent(),
                 Value<int> status = const Value.absent(),
                 Value<DateTime?> exitDate = const Value.absent(),
                 Value<bool?> exitProrata = const Value.absent(),
@@ -12945,6 +14703,9 @@ class $$ContractsTableTableManager
                 deposit: deposit,
                 depositPaid: depositPaid,
                 entryProrata: entryProrata,
+                firstRentMode: firstRentMode,
+                firstRentAmount: firstRentAmount,
+                firstRentNote: firstRentNote,
                 status: status,
                 exitDate: exitDate,
                 exitProrata: exitProrata,
@@ -12964,6 +14725,9 @@ class $$ContractsTableTableManager
                 Value<int> deposit = const Value.absent(),
                 Value<int> depositPaid = const Value.absent(),
                 Value<bool> entryProrata = const Value.absent(),
+                Value<int> firstRentMode = const Value.absent(),
+                Value<int?> firstRentAmount = const Value.absent(),
+                Value<String?> firstRentNote = const Value.absent(),
                 Value<int> status = const Value.absent(),
                 Value<DateTime?> exitDate = const Value.absent(),
                 Value<bool?> exitProrata = const Value.absent(),
@@ -12981,6 +14745,9 @@ class $$ContractsTableTableManager
                 deposit: deposit,
                 depositPaid: depositPaid,
                 entryProrata: entryProrata,
+                firstRentMode: firstRentMode,
+                firstRentAmount: firstRentAmount,
+                firstRentNote: firstRentNote,
                 status: status,
                 exitDate: exitDate,
                 exitProrata: exitProrata,
@@ -13001,6 +14768,7 @@ class $$ContractsTableTableManager
                 apartmentId = false,
                 tenantId = false,
                 contractServicesRefs = false,
+                contractRentsRefs = false,
                 contractBenefitsRefs = false,
                 readingsRefs = false,
                 invoicesRefs = false,
@@ -13011,6 +14779,7 @@ class $$ContractsTableTableManager
                   db: db,
                   explicitlyWatchedTables: [
                     if (contractServicesRefs) db.contractServices,
+                    if (contractRentsRefs) db.contractRents,
                     if (contractBenefitsRefs) db.contractBenefits,
                     if (readingsRefs) db.readings,
                     if (invoicesRefs) db.invoices,
@@ -13079,6 +14848,27 @@ class $$ContractsTableTableManager
                                 table,
                                 p0,
                               ).contractServicesRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.contractId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (contractRentsRefs)
+                        await $_getPrefetchedData<
+                          Contract,
+                          $ContractsTable,
+                          ContractRent
+                        >(
+                          currentTable: table,
+                          referencedTable: $$ContractsTableReferences
+                              ._contractRentsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ContractsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).contractRentsRefs,
                           referencedItemsForCurrentItem:
                               (item, referencedItems) => referencedItems.where(
                                 (e) => e.contractId == item.id,
@@ -13214,6 +15004,7 @@ typedef $$ContractsTableProcessedTableManager =
         bool apartmentId,
         bool tenantId,
         bool contractServicesRefs,
+        bool contractRentsRefs,
         bool contractBenefitsRefs,
         bool readingsRefs,
         bool invoicesRefs,
@@ -13656,6 +15447,306 @@ typedef $$ContractServicesTableProcessedTableManager =
       (ContractService, $$ContractServicesTableReferences),
       ContractService,
       PrefetchHooks Function({bool contractId, bool serviceTypeId})
+    >;
+typedef $$ContractRentsTableCreateCompanionBuilder =
+    ContractRentsCompanion Function({
+      Value<int> id,
+      required int contractId,
+      required int fromPeriod,
+      required int rent,
+    });
+typedef $$ContractRentsTableUpdateCompanionBuilder =
+    ContractRentsCompanion Function({
+      Value<int> id,
+      Value<int> contractId,
+      Value<int> fromPeriod,
+      Value<int> rent,
+    });
+
+final class $$ContractRentsTableReferences
+    extends BaseReferences<_$AppDatabase, $ContractRentsTable, ContractRent> {
+  $$ContractRentsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $ContractsTable _contractIdTable(_$AppDatabase db) =>
+      db.contracts.createAlias(
+        $_aliasNameGenerator(db.contractRents.contractId, db.contracts.id),
+      );
+
+  $$ContractsTableProcessedTableManager get contractId {
+    final $_column = $_itemColumn<int>('contract_id')!;
+
+    final manager = $$ContractsTableTableManager(
+      $_db,
+      $_db.contracts,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_contractIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$ContractRentsTableFilterComposer
+    extends Composer<_$AppDatabase, $ContractRentsTable> {
+  $$ContractRentsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get fromPeriod => $composableBuilder(
+    column: $table.fromPeriod,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get rent => $composableBuilder(
+    column: $table.rent,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$ContractsTableFilterComposer get contractId {
+    final $$ContractsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contractId,
+      referencedTable: $db.contracts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContractsTableFilterComposer(
+            $db: $db,
+            $table: $db.contracts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ContractRentsTableOrderingComposer
+    extends Composer<_$AppDatabase, $ContractRentsTable> {
+  $$ContractRentsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get fromPeriod => $composableBuilder(
+    column: $table.fromPeriod,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get rent => $composableBuilder(
+    column: $table.rent,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$ContractsTableOrderingComposer get contractId {
+    final $$ContractsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contractId,
+      referencedTable: $db.contracts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContractsTableOrderingComposer(
+            $db: $db,
+            $table: $db.contracts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ContractRentsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ContractRentsTable> {
+  $$ContractRentsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get fromPeriod => $composableBuilder(
+    column: $table.fromPeriod,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get rent =>
+      $composableBuilder(column: $table.rent, builder: (column) => column);
+
+  $$ContractsTableAnnotationComposer get contractId {
+    final $$ContractsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.contractId,
+      referencedTable: $db.contracts,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContractsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.contracts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ContractRentsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ContractRentsTable,
+          ContractRent,
+          $$ContractRentsTableFilterComposer,
+          $$ContractRentsTableOrderingComposer,
+          $$ContractRentsTableAnnotationComposer,
+          $$ContractRentsTableCreateCompanionBuilder,
+          $$ContractRentsTableUpdateCompanionBuilder,
+          (ContractRent, $$ContractRentsTableReferences),
+          ContractRent,
+          PrefetchHooks Function({bool contractId})
+        > {
+  $$ContractRentsTableTableManager(_$AppDatabase db, $ContractRentsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ContractRentsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ContractRentsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ContractRentsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> contractId = const Value.absent(),
+                Value<int> fromPeriod = const Value.absent(),
+                Value<int> rent = const Value.absent(),
+              }) => ContractRentsCompanion(
+                id: id,
+                contractId: contractId,
+                fromPeriod: fromPeriod,
+                rent: rent,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int contractId,
+                required int fromPeriod,
+                required int rent,
+              }) => ContractRentsCompanion.insert(
+                id: id,
+                contractId: contractId,
+                fromPeriod: fromPeriod,
+                rent: rent,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$ContractRentsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({contractId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (contractId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.contractId,
+                                referencedTable: $$ContractRentsTableReferences
+                                    ._contractIdTable(db),
+                                referencedColumn: $$ContractRentsTableReferences
+                                    ._contractIdTable(db)
+                                    .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$ContractRentsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ContractRentsTable,
+      ContractRent,
+      $$ContractRentsTableFilterComposer,
+      $$ContractRentsTableOrderingComposer,
+      $$ContractRentsTableAnnotationComposer,
+      $$ContractRentsTableCreateCompanionBuilder,
+      $$ContractRentsTableUpdateCompanionBuilder,
+      (ContractRent, $$ContractRentsTableReferences),
+      ContractRent,
+      PrefetchHooks Function({bool contractId})
     >;
 typedef $$ContractBenefitsTableCreateCompanionBuilder =
     ContractBenefitsCompanion Function({
@@ -17111,6 +19202,8 @@ class $AppDatabaseManager {
       $$TenantsTableTableManager(_db, _db.tenants);
   $$UtilityTypesTableTableManager get utilityTypes =>
       $$UtilityTypesTableTableManager(_db, _db.utilityTypes);
+  $$UtilityTariffsTableTableManager get utilityTariffs =>
+      $$UtilityTariffsTableTableManager(_db, _db.utilityTariffs);
   $$MetersTableTableManager get meters =>
       $$MetersTableTableManager(_db, _db.meters);
   $$ServiceTypesTableTableManager get serviceTypes =>
@@ -17119,6 +19212,8 @@ class $AppDatabaseManager {
       $$ContractsTableTableManager(_db, _db.contracts);
   $$ContractServicesTableTableManager get contractServices =>
       $$ContractServicesTableTableManager(_db, _db.contractServices);
+  $$ContractRentsTableTableManager get contractRents =>
+      $$ContractRentsTableTableManager(_db, _db.contractRents);
   $$ContractBenefitsTableTableManager get contractBenefits =>
       $$ContractBenefitsTableTableManager(_db, _db.contractBenefits);
   $$ReadingsTableTableManager get readings =>

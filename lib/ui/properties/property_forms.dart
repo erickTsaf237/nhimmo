@@ -90,6 +90,7 @@ class _BuildingFormState extends State<BuildingForm> {
   late final _name = TextEditingController(text: widget.building?.name);
   late final _address = TextEditingController(text: widget.building?.address);
   late final _notes = TextEditingController(text: widget.building?.notes);
+  late final _penalty = TextEditingController(text: widget.building == null || widget.building!.latePenalty == 0 ? '' : Money.toInput(widget.building!.latePenalty));
   late int? _ownerId = widget.building?.ownerId;
 
   @override
@@ -138,6 +139,7 @@ class _BuildingFormState extends State<BuildingForm> {
               name: Value(_name.text.trim()),
               address: Value(emptyToNull(_address.text)),
               notes: Value(emptyToNull(_notes.text)),
+              latePenalty: Value(Money.parse(_penalty.text) ?? 0),
             );
             if (b == null) {
               await _db.into(_db.buildings).insert(c);
@@ -159,6 +161,7 @@ class _BuildingFormState extends State<BuildingForm> {
             ),
             Field(_name, context.t.buildingName, icon: Icons.location_city_outlined, required: true, hint: context.t.buildingNameHint),
             Field(_address, context.t.address, icon: Icons.place_outlined),
+            AmountField(_penalty, context.t.buildingPenalty, required: false, helper: context.t.buildingPenaltyHelp),
             Field(_notes, context.t.notes, icon: Icons.notes, maxLines: 3),
           ],
         );
@@ -184,6 +187,7 @@ class _ApartmentFormState extends State<ApartmentForm> {
   late final _desc = TextEditingController(text: widget.apartment?.description);
   late final _rent = TextEditingController(text: widget.apartment == null ? '' : Money.toInput(widget.apartment!.rent));
   late final _deposit = TextEditingController(text: widget.apartment == null ? '' : Money.toInput(widget.apartment!.deposit));
+  late final _penalty = TextEditingController(text: widget.apartment?.latePenalty == null ? '' : Money.toInput(widget.apartment!.latePenalty!));
   late int? _buildingId = widget.apartment?.buildingId;
   final _withMeters = <int>{};
 
@@ -224,6 +228,7 @@ class _ApartmentFormState extends State<ApartmentForm> {
               description: Value(emptyToNull(_desc.text)),
               rent: Value(Money.parse(_rent.text) ?? 0),
               deposit: Value(Money.parse(_deposit.text) ?? 0),
+              latePenalty: Value(Money.parse(_penalty.text)),
             );
             if (a == null) {
               await _db.transaction(() async {
@@ -253,6 +258,8 @@ class _ApartmentFormState extends State<ApartmentForm> {
             Field(_desc, context.t.description, icon: Icons.notes, maxLines: 2, hint: context.t.aptDescHint),
             AmountField(_rent, context.t.defaultRent, required: false),
             AmountField(_deposit, context.t.defaultDeposit, required: false),
+            AmountField(_penalty, context.t.aptPenalty, required: false,
+                helper: context.t.aptPenaltyHelp(Money.format(buildings.where((b) => b.id == _buildingId).firstOrNull?.latePenalty ?? 0))),
             if (a == null && types.isNotEmpty) ...[
               SectionHeader(context.t.metersToCreate),
               Wrap(spacing: 8, runSpacing: 8, children: [

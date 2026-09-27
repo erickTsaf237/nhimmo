@@ -2,11 +2,13 @@ import 'dart:math';
 
 import 'package:drift/drift.dart';
 
+import '../core/billing_calc.dart';
 import '../core/dates.dart';
 import '../data/database.dart';
 import '../data/repo.dart';
 import 'app_state.dart';
 import 'billing_service.dart';
+import 'tariff_service.dart';
 
 class _Lease {
   final String tenant;
@@ -32,7 +34,21 @@ class DemoService {
 
   static const _f = 100; // 1 FCFA = 100 centimes
 
+  static bool _loading = false;
+
+  /// Charge les données de démonstration une seule fois, même si l'utilisateur touche
+  /// plusieurs fois la carte pendant le chargement (qui prend quelques secondes).
   static Future<void> load() async {
+    if (_loading || !await isEmpty()) return;
+    _loading = true;
+    try {
+      await _load();
+    } finally {
+      _loading = false;
+    }
+  }
+
+  static Future<void> _load() async {
     final db = App.db;
     final rnd = Random(42);
     final today = Dates.dayOnly(DateTime.now());
@@ -48,16 +64,20 @@ class DemoService {
       ..currencyCode = 'XAF'
       ..currencySymbol = 'FCFA'
       ..symbolBefore = false
-      ..dueDay = 5;
+      ..dueDay = 10;
     await App.settings.save();
 
     final types = await db.select(db.utilityTypes).get();
     final water = types.firstWhere((t) => t.name == 'Eau');
     final elec = types.firstWhere((t) => t.name == 'Électricité');
-    await (db.update(db.utilityTypes)..where((t) => t.id.equals(water.id))).write(
-        const UtilityTypesCompanion(unitPrice: Value(400 * _f), fixedFee: Value(500 * _f)));
-    await (db.update(db.utilityTypes)..where((t) => t.id.equals(elec.id))).write(const UtilityTypesCompanion(
-        unitPrice: Value(99 * _f), fixedFee: Value(1000 * _f), vatRate: Value(19.25), vatMode: Value(2)));
+    // Eau : 368 F/m³ + TVA 19,25 % en sus + 200 F d'entretien.
+    await TariffService.save(water.id, UtilityTariffs.origin, const Tariff(
+        unitPrice: 368 * _f, fixedFee: 200 * _f, vatRate: 19.25, vatMode: VatMode.added));
+    // Électricité : 100 F/kWh TVA incluse, puis 110 F depuis trois mois (historique de tarifs).
+    await TariffService.save(elec.id, UtilityTariffs.origin, const Tariff(
+        unitPrice: 100 * _f, fixedFee: 200 * _f, vatRate: 19.25, vatMode: VatMode.included));
+    await TariffService.save(elec.id, Period.add(Period.current(), -3), const Tariff(
+        unitPrice: 110 * _f, fixedFee: 200 * _f, vatRate: 19.25, vatMode: VatMode.included));
 
     final parking = (await db.select(db.serviceTypes).get()).first;
     await (db.update(db.serviceTypes)..where((s) => s.id.equals(parking.id)))
@@ -75,7 +95,8 @@ class DemoService {
     final b1 = await db.into(db.buildings).insert(BuildingsCompanion.insert(
         ownerId: o1, name: 'Résidence Les Palmiers', address: const Value('Rue Koloko, Bonapriso – Douala')));
     final b2 = await db.into(db.buildings).insert(BuildingsCompanion.insert(
-        ownerId: o2, name: 'Immeuble Ekotto', address: const Value('Boulevard de la Liberté, Akwa – Douala')));
+        ownerId: o2, name: 'Immeuble Ekotto', address: const Value('Boulevard de la Liberté, Akwa – Douala'),
+        latePenalty: const Value(5000 * _f)));
 
     final aptSpecs = [
       (b1, 'A1', 'RDC', 'Studio meublé, douche, kitchenette', 85000),

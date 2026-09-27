@@ -145,10 +145,10 @@ class ExportService {
           pv.cv.tenant.fullName,
           pv.cv.building.name,
           pv.cv.apt.name,
-          [t.xPayment, t.depositApplied, t.refundKind, t.depositReceived][pv.pay.kind],
+          [t.xPayment, t.depositApplied, t.refundKind, t.depositReceived, t.penaltyKind][pv.pay.kind],
           Labels.method(t, pv.pay.method),
           pv.pay.reference ?? '',
-          _amount(pv.pay.kind == 2 ? -pv.pay.amount : pv.pay.amount),
+          _amount(pv.pay.kind == 2 || pv.pay.kind == 4 ? -pv.pay.amount : pv.pay.amount),
           pv.pay.note ?? '',
         ],
     ];

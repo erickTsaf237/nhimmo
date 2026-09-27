@@ -7,6 +7,7 @@ import 'package:myimmo/data/database.dart';
 import 'package:myimmo/data/repo.dart';
 import 'package:myimmo/services/app_state.dart';
 import 'package:myimmo/services/billing_service.dart';
+import 'package:myimmo/services/tariff_service.dart';
 import 'package:myimmo/services/export_service.dart';
 import 'package:myimmo/services/pdf_service.dart';
 import 'package:myimmo/services/signature_service.dart';
@@ -28,8 +29,9 @@ void main() {
     final water = await (db.select(db.utilityTypes)..where((t) => t.name.equals('Eau'))).getSingle();
     final elec = await (db.select(db.utilityTypes)..where((t) => t.name.equals('Électricité'))).getSingle();
     // Électricité : TVA 19,25 % en sus + entretien 1 000.
-    await (db.update(db.utilityTypes)..where((t) => t.id.equals(elec.id))).write(const UtilityTypesCompanion(
-        fixedFee: Value(100000), vatRate: Value(19.25), vatMode: Value(2)));
+    await TariffService.save(water.id, UtilityTariffs.origin, const Tariff(unitPrice: 50000));
+    await TariffService.save(elec.id, UtilityTariffs.origin, const Tariff(
+        unitPrice: 10000, fixedFee: 100000, vatRate: 19.25, vatMode: VatMode.added));
     final parking = await db.select(db.serviceTypes).getSingle();
 
     final owner = await db.into(db.owners).insert(OwnersCompanion.insert(name: 'M. Propriétaire'));

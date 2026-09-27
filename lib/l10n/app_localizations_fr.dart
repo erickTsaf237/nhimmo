@@ -2216,4 +2216,260 @@ class AppLocalizationsFr extends AppLocalizations {
   String pdfDepositReceivedText(String tenant, String place) {
     return 'Reçu de $tenant, locataire de $place, au titre de la caution, la somme de :';
   }
+
+  @override
+  String tariffNewFrom(String month) {
+    return 'Nouveau tarif à partir de $month';
+  }
+
+  @override
+  String get tariffCorrect => 'Corriger le tarif en vigueur';
+
+  @override
+  String get tariffNewHelp =>
+      'Les mois précédents gardent l\'ancien tarif, même si leurs factures sont recalculées.';
+
+  @override
+  String tariffCorrectHelp(String since) {
+    return 'Remplace le tarif en vigueur ($since) : utile pour corriger une erreur de saisie.';
+  }
+
+  @override
+  String get tariffHistory => 'Historique des tarifs';
+
+  @override
+  String get tariffOrigin => 'Depuis toujours';
+
+  @override
+  String tariffSince(String month) {
+    return 'Depuis $month';
+  }
+
+  @override
+  String get tariffCurrent => 'En vigueur';
+
+  @override
+  String get deleteTariffQ => 'Supprimer ce tarif ?';
+
+  @override
+  String get deleteTariffHelp =>
+      'Les mois concernés utiliseront le tarif précédent lors des prochains calculs. Les factures verrouillées ne changent pas.';
+
+  @override
+  String get latePenalty => 'Pénalité de retard';
+
+  @override
+  String get latePenaltyHelp =>
+      'Le locataire paie en retard : la pénalité s\'ajoute à ce qu\'il doit.';
+
+  @override
+  String get latePenaltyAmount => 'Montant de la pénalité';
+
+  @override
+  String get latePenaltyScope =>
+      'Modifier ce montant ne change que la pénalité de cet appartement. Pour tous, modifiez celle de l\'immeuble.';
+
+  @override
+  String get recomputingExpected => 'Calcul du nouveau montant attendu…';
+
+  @override
+  String get newExpectedTotal => 'Nouveau montant attendu';
+
+  @override
+  String get buildingPenalty => 'Pénalité de retard par défaut';
+
+  @override
+  String get buildingPenaltyHelp =>
+      'S\'applique à tous les appartements de l\'immeuble qui n\'ont pas leur propre pénalité.';
+
+  @override
+  String get aptPenalty => 'Pénalité de retard de l\'appartement';
+
+  @override
+  String aptPenaltyHelp(String amount) {
+    return 'Vide : pénalité de l\'immeuble ($amount).';
+  }
+
+  @override
+  String get penaltyKind => 'Pénalité de retard';
+
+  @override
+  String rentNewFrom(String month) {
+    return 'Nouveau loyer à partir de $month';
+  }
+
+  @override
+  String get rentCorrect => 'Corriger le loyer en vigueur';
+
+  @override
+  String get rentNewHelp =>
+      'Les mois précédents gardent l\'ancien loyer, même si leurs factures sont recalculées.';
+
+  @override
+  String get rentCorrectHelp =>
+      'Remplace le loyer en vigueur : utile pour corriger une erreur de saisie.';
+
+  @override
+  String rentSince(String month) {
+    return 'Loyer depuis $month';
+  }
+
+  @override
+  String get rentFromStart => 'Loyer depuis l\'entrée';
+
+  @override
+  String get historySheet => 'Fiche historique (PDF)';
+
+  @override
+  String get historySheetHelp =>
+      'Tous les mois du bail : relevés, loyer, pénalités, montant attendu et règlements';
+
+  @override
+  String get hsTitle => 'Fiche historique du logement';
+
+  @override
+  String get hsMonth => 'Mois';
+
+  @override
+  String get hsNew => 'NV';
+
+  @override
+  String get hsOld => 'Ancien';
+
+  @override
+  String get hsAmount => 'Montant';
+
+  @override
+  String get hsRent => 'Loyer';
+
+  @override
+  String get hsOther => 'Services / autres';
+
+  @override
+  String get hsPenalty => 'Pénalité';
+
+  @override
+  String get hsExpected => 'Montant attendu';
+
+  @override
+  String get hsPaid => 'Payé';
+
+  @override
+  String get hsSettled => 'Réglé le';
+
+  @override
+  String get hsRemarks => 'Remarques';
+
+  @override
+  String get hsPaidFull => 'Soldé';
+
+  @override
+  String hsPartial(String amount) {
+    return 'Reste $amount';
+  }
+
+  @override
+  String get hsUnpaid => 'Impayé';
+
+  @override
+  String get hsExit => 'Sortie';
+
+  @override
+  String get hsTotals => 'Totaux';
+
+  @override
+  String hsBalance(String amount) {
+    return 'Solde actuel du locataire : $amount';
+  }
+
+  @override
+  String hsPrinted(String date) {
+    return 'Édité le $date';
+  }
+
+  @override
+  String hsLease(String start, String end) {
+    return 'Bail du $start au $end';
+  }
+
+  @override
+  String get firstRent => 'Premier loyer (payé à la signature)';
+
+  @override
+  String get firstRentFlat => 'Forfait';
+
+  @override
+  String get firstRentFlatShort => 'forfait';
+
+  @override
+  String get firstRentFlatHelp =>
+      'Montant libre pour le premier mois, avec un commentaire.';
+
+  @override
+  String get firstRentDueAtSigning =>
+      'La facture d\'entrée est créée à la signature et doit être payée ce jour-là.';
+
+  @override
+  String get firstRentAmount => 'Montant du premier loyer';
+
+  @override
+  String get firstRentNote => 'Commentaire';
+
+  @override
+  String get firstRentNoteHint =>
+      'ex. entrée le 20, arrangement avec le propriétaire';
+
+  @override
+  String get signSlip => 'Bordereau de signature';
+
+  @override
+  String get signSlipHelp =>
+      'Trace de la signature du bail, à remettre au locataire';
+
+  @override
+  String get bsHousing => 'Logement';
+
+  @override
+  String get bsTerms => 'Conditions convenues';
+
+  @override
+  String get bsSigningDate => 'Date de signature et d\'entrée';
+
+  @override
+  String get bsPlannedEnd => 'Fin prévue';
+
+  @override
+  String bsDueRule(String day) {
+    return 'Le loyer est payable au plus tard le $day de chaque mois ; le premier loyer se paie à la signature.';
+  }
+
+  @override
+  String get bsNoService => 'Aucun service';
+
+  @override
+  String get bsMeter => 'Compteur';
+
+  @override
+  String get bsIndex => 'Index';
+
+  @override
+  String get bsAtSigning => 'À régler à la signature';
+
+  @override
+  String bsFirstInvoice(String number) {
+    return 'Première facture ($number)';
+  }
+
+  @override
+  String get bsDepositLeft => 'Caution restant à verser';
+
+  @override
+  String get bsRemaining => 'Reste à payer';
+
+  @override
+  String get bsDisclaimer =>
+      'Ce bordereau atteste de la signature du bail aux conditions ci-dessus. Il ne remplace pas le contrat de bail.';
+
+  @override
+  String get yes => 'Oui';
 }

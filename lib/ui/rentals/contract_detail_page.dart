@@ -187,6 +187,38 @@ class ContractDetailPage extends StatelessWidget {
                     const Icon(Icons.chevron_right_rounded),
                   ]),
                 ),
+              const SizedBox(height: 10),
+              AppCard(
+                onTap: () => openPdf(context, context.t.signSlip, 'bordereau-${cv.tenant.fullName}.pdf',
+                    () => PdfService.signingSlip(c.id)),
+                child: Row(children: [
+                  const IconBadge(Icons.draw_rounded, AppColors.success, size: 40),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      Text(context.t.signSlip, style: const TextStyle(fontWeight: FontWeight.w700)),
+                      Text(context.t.signSlipHelp, style: const TextStyle(fontSize: 12.5)),
+                    ]),
+                  ),
+                  const Icon(Icons.chevron_right_rounded),
+                ]),
+              ),
+              const SizedBox(height: 10),
+              AppCard(
+                onTap: () => openPdf(context, context.t.hsTitle, 'historique-${cv.tenant.fullName}.pdf',
+                    () => PdfService.historySheet(c.id)),
+                child: Row(children: [
+                  const IconBadge(Icons.table_chart_rounded, AppColors.info, size: 40),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      Text(context.t.historySheet, style: const TextStyle(fontWeight: FontWeight.w700)),
+                      Text(context.t.historySheetHelp, style: const TextStyle(fontSize: 12.5)),
+                    ]),
+                  ),
+                  const Icon(Icons.chevron_right_rounded),
+                ]),
+              ),
               SectionHeader(context.t.lease),
               AppCard(
                 child: Column(children: [
@@ -195,7 +227,11 @@ class ContractDetailPage extends StatelessWidget {
                   if (c.exitDate != null) InfoRow(context.t.moveOut, Dates.long(c.exitDate)),
                   InfoRow(context.t.monthlyRent, Money.format(c.rent)),
                   InfoRow(context.t.depositPaidShort, color: c.depositPaid < c.deposit ? AppColors.warning : null, '${Money.format(c.depositPaid)}${c.deposit != c.depositPaid ? ' / ${Money.format(c.deposit)}' : ''}'),
-                  InfoRow(context.t.firstMonth, c.entryProrata ? context.t.prorated : context.t.fullMonth),
+                  InfoRow(context.t.firstMonth, switch (c.firstRentMode) {
+                    1 => context.t.fullMonth,
+                    2 => '${context.t.firstRentFlat} · ${Money.format(c.firstRentAmount ?? 0)}${c.firstRentNote == null ? '' : ' (${c.firstRentNote})'}',
+                    _ => context.t.prorated,
+                  }),
                   if (c.exitProrata != null) InfoRow(context.t.lastMonth, c.exitProrata! ? context.t.prorated : context.t.fullMonth),
                   if (c.damagesAmount > 0) InfoRow(context.t.damagesRetained, Money.format(c.damagesAmount), color: AppColors.danger),
                   for (final (s, t) in d.services)

@@ -64,3 +64,7 @@ functions/node_modules/
 
 # Python
 __pycache__/
+
+# Données de clients (jamais sur GitHub)
+historique/
+**/historique/

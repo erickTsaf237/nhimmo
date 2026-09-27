@@ -8,6 +8,7 @@ import 'package:myimmo/data/database.dart';
 import 'package:myimmo/data/repo.dart';
 import 'package:myimmo/services/app_state.dart';
 import 'package:myimmo/services/billing_service.dart';
+import 'package:myimmo/services/tariff_service.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -47,8 +48,8 @@ void main() {
     await App.settings.load();
 
     final elec = await (db.select(db.utilityTypes)..where((t) => t.name.equals('Électricité'))).getSingle();
-    await (db.update(db.utilityTypes)..where((t) => t.id.equals(elec.id)))
-        .write(const UtilityTypesCompanion(vatRate: Value(19.25), vatMode: Value(2), fixedFee: Value(100000)));
+    await TariffService.save(elec.id, UtilityTariffs.origin, const Tariff(
+        unitPrice: 10000, fixedFee: 100000, vatRate: 19.25, vatMode: VatMode.added));
     final parking = await db.select(db.serviceTypes).getSingle();
     final o = await db.into(db.owners).insert(OwnersCompanion.insert(name: 'P'));
     final b = await db.into(db.buildings).insert(BuildingsCompanion.insert(ownerId: o, name: 'B'));

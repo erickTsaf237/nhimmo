@@ -45,7 +45,7 @@ class AppSettings extends ChangeNotifier {
   String currencyCode = 'XAF';
   String currencySymbol = 'FCFA';
   bool symbolBefore = false;
-  int dueDay = 5;
+  int dueDay = 10;
   String invoiceFooter = '';
 
   /// 'system' ou un code de langue ('fr', 'en'...).
@@ -61,7 +61,7 @@ class AppSettings extends ChangeNotifier {
     currencyCode = m['currencyCode'] ?? 'XAF';
     currencySymbol = m['currencySymbol'] ?? 'FCFA';
     symbolBefore = m['symbolBefore'] == '1';
-    dueDay = int.tryParse(m['dueDay'] ?? '') ?? 5;
+    dueDay = int.tryParse(m['dueDay'] ?? '') ?? 10;
     invoiceFooter = m['invoiceFooter'] ?? '';
     appLanguage = m['appLanguage'] ?? 'system';
     _apply();

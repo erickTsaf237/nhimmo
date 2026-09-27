@@ -159,7 +159,7 @@ class Repo {
       out[r.read<int>('c')] = r.read<int>('s');
     }
     final pay = await db.customSelect(
-      'SELECT contract_id AS c, SUM(CASE WHEN kind = 2 THEN -amount WHEN kind = 3 THEN 0 ELSE amount END) AS s '
+      'SELECT contract_id AS c, SUM(CASE WHEN kind IN (2, 4) THEN -amount WHEN kind = 3 THEN 0 ELSE amount END) AS s '
       'FROM payments GROUP BY contract_id',
       readsFrom: {db.payments},
     ).get();
@@ -231,7 +231,7 @@ class Repo {
 
   static Future<int> credit(int contractId) async {
     final r = await db.customSelect(
-      'SELECT COALESCE(SUM(CASE WHEN kind = 2 THEN -amount WHEN kind = 3 THEN 0 ELSE amount END), 0) AS s '
+      'SELECT COALESCE(SUM(CASE WHEN kind IN (2, 4) THEN -amount WHEN kind = 3 THEN 0 ELSE amount END), 0) AS s '
       'FROM payments WHERE contract_id = ?',
       variables: [Variable.withInt(contractId)],
       readsFrom: {db.payments},

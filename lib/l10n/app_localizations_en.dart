@@ -2208,4 +2208,260 @@ class AppLocalizationsEn extends AppLocalizations {
   String pdfDepositReceivedText(String tenant, String place) {
     return 'Received from $tenant, tenant of $place, as security deposit, the sum of:';
   }
+
+  @override
+  String tariffNewFrom(String month) {
+    return 'New rate from $month';
+  }
+
+  @override
+  String get tariffCorrect => 'Correct the current rate';
+
+  @override
+  String get tariffNewHelp =>
+      'Earlier months keep the previous rate, even if their invoices are recalculated.';
+
+  @override
+  String tariffCorrectHelp(String since) {
+    return 'Replaces the current rate ($since): use it to fix a typing error.';
+  }
+
+  @override
+  String get tariffHistory => 'Rate history';
+
+  @override
+  String get tariffOrigin => 'Since the beginning';
+
+  @override
+  String tariffSince(String month) {
+    return 'Since $month';
+  }
+
+  @override
+  String get tariffCurrent => 'Current';
+
+  @override
+  String get deleteTariffQ => 'Delete this rate?';
+
+  @override
+  String get deleteTariffHelp =>
+      'The months concerned will use the previous rate in future calculations. Locked invoices do not change.';
+
+  @override
+  String get latePenalty => 'Late payment penalty';
+
+  @override
+  String get latePenaltyHelp =>
+      'The tenant is paying late: the penalty is added to what they owe.';
+
+  @override
+  String get latePenaltyAmount => 'Penalty amount';
+
+  @override
+  String get latePenaltyScope =>
+      'Changing this amount only affects this apartment. To change it for all, edit the building\'s penalty.';
+
+  @override
+  String get recomputingExpected => 'Computing the new expected amount…';
+
+  @override
+  String get newExpectedTotal => 'New expected amount';
+
+  @override
+  String get buildingPenalty => 'Default late payment penalty';
+
+  @override
+  String get buildingPenaltyHelp =>
+      'Applies to all apartments in the building that have no penalty of their own.';
+
+  @override
+  String get aptPenalty => 'Apartment late payment penalty';
+
+  @override
+  String aptPenaltyHelp(String amount) {
+    return 'Empty: building penalty ($amount).';
+  }
+
+  @override
+  String get penaltyKind => 'Late penalty';
+
+  @override
+  String rentNewFrom(String month) {
+    return 'New rent from $month';
+  }
+
+  @override
+  String get rentCorrect => 'Correct the current rent';
+
+  @override
+  String get rentNewHelp =>
+      'Earlier months keep the previous rent, even if their invoices are recalculated.';
+
+  @override
+  String get rentCorrectHelp =>
+      'Replaces the current rent: use it to fix a typing error.';
+
+  @override
+  String rentSince(String month) {
+    return 'Rent since $month';
+  }
+
+  @override
+  String get rentFromStart => 'Rent since move-in';
+
+  @override
+  String get historySheet => 'History sheet (PDF)';
+
+  @override
+  String get historySheetHelp =>
+      'Every month of the lease: readings, rent, penalties, expected amount and payments';
+
+  @override
+  String get hsTitle => 'Rental history sheet';
+
+  @override
+  String get hsMonth => 'Month';
+
+  @override
+  String get hsNew => 'New';
+
+  @override
+  String get hsOld => 'Old';
+
+  @override
+  String get hsAmount => 'Amount';
+
+  @override
+  String get hsRent => 'Rent';
+
+  @override
+  String get hsOther => 'Services / other';
+
+  @override
+  String get hsPenalty => 'Penalty';
+
+  @override
+  String get hsExpected => 'Expected amount';
+
+  @override
+  String get hsPaid => 'Paid';
+
+  @override
+  String get hsSettled => 'Settled on';
+
+  @override
+  String get hsRemarks => 'Remarks';
+
+  @override
+  String get hsPaidFull => 'Settled';
+
+  @override
+  String hsPartial(String amount) {
+    return '$amount left';
+  }
+
+  @override
+  String get hsUnpaid => 'Unpaid';
+
+  @override
+  String get hsExit => 'Move-out';
+
+  @override
+  String get hsTotals => 'Totals';
+
+  @override
+  String hsBalance(String amount) {
+    return 'Tenant\'s current balance: $amount';
+  }
+
+  @override
+  String hsPrinted(String date) {
+    return 'Printed on $date';
+  }
+
+  @override
+  String hsLease(String start, String end) {
+    return 'Lease from $start to $end';
+  }
+
+  @override
+  String get firstRent => 'First rent (paid at signing)';
+
+  @override
+  String get firstRentFlat => 'Flat amount';
+
+  @override
+  String get firstRentFlatShort => 'flat';
+
+  @override
+  String get firstRentFlatHelp =>
+      'Free amount for the first month, with a comment.';
+
+  @override
+  String get firstRentDueAtSigning =>
+      'The move-in invoice is created at signing and is due that day.';
+
+  @override
+  String get firstRentAmount => 'First rent amount';
+
+  @override
+  String get firstRentNote => 'Comment';
+
+  @override
+  String get firstRentNoteHint =>
+      'e.g. moved in on the 20th, agreed with the owner';
+
+  @override
+  String get signSlip => 'Signing slip';
+
+  @override
+  String get signSlipHelp =>
+      'Record of the lease signing, to hand to the tenant';
+
+  @override
+  String get bsHousing => 'Premises';
+
+  @override
+  String get bsTerms => 'Agreed terms';
+
+  @override
+  String get bsSigningDate => 'Signing and move-in date';
+
+  @override
+  String get bsPlannedEnd => 'Planned end';
+
+  @override
+  String bsDueRule(String day) {
+    return 'Rent is payable no later than day $day of each month; the first rent is paid at signing.';
+  }
+
+  @override
+  String get bsNoService => 'No services';
+
+  @override
+  String get bsMeter => 'Meter';
+
+  @override
+  String get bsIndex => 'Reading';
+
+  @override
+  String get bsAtSigning => 'Due at signing';
+
+  @override
+  String bsFirstInvoice(String number) {
+    return 'First invoice ($number)';
+  }
+
+  @override
+  String get bsDepositLeft => 'Deposit still to pay';
+
+  @override
+  String get bsRemaining => 'Remaining to pay';
+
+  @override
+  String get bsDisclaimer =>
+      'This slip records the signing of the lease on the terms above. It does not replace the lease agreement.';
+
+  @override
+  String get yes => 'Yes';
 }

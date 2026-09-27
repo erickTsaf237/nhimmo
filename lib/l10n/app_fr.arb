@@ -1440,5 +1440,165 @@
         "type": "String"
       }
     }
-  }
+  },
+  "tariffNewFrom": "Nouveau tarif à partir de {month}",
+  "@tariffNewFrom": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "tariffCorrect": "Corriger le tarif en vigueur",
+  "tariffNewHelp": "Les mois précédents gardent l'ancien tarif, même si leurs factures sont recalculées.",
+  "tariffCorrectHelp": "Remplace le tarif en vigueur ({since}) : utile pour corriger une erreur de saisie.",
+  "@tariffCorrectHelp": {
+    "placeholders": {
+      "since": {
+        "type": "String"
+      }
+    }
+  },
+  "tariffHistory": "Historique des tarifs",
+  "tariffOrigin": "Depuis toujours",
+  "tariffSince": "Depuis {month}",
+  "@tariffSince": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "tariffCurrent": "En vigueur",
+  "deleteTariffQ": "Supprimer ce tarif ?",
+  "deleteTariffHelp": "Les mois concernés utiliseront le tarif précédent lors des prochains calculs. Les factures verrouillées ne changent pas.",
+  "latePenalty": "Pénalité de retard",
+  "latePenaltyHelp": "Le locataire paie en retard : la pénalité s'ajoute à ce qu'il doit.",
+  "latePenaltyAmount": "Montant de la pénalité",
+  "latePenaltyScope": "Modifier ce montant ne change que la pénalité de cet appartement. Pour tous, modifiez celle de l'immeuble.",
+  "recomputingExpected": "Calcul du nouveau montant attendu…",
+  "newExpectedTotal": "Nouveau montant attendu",
+  "buildingPenalty": "Pénalité de retard par défaut",
+  "buildingPenaltyHelp": "S'applique à tous les appartements de l'immeuble qui n'ont pas leur propre pénalité.",
+  "aptPenalty": "Pénalité de retard de l'appartement",
+  "aptPenaltyHelp": "Vide : pénalité de l'immeuble ({amount}).",
+  "@aptPenaltyHelp": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "penaltyKind": "Pénalité de retard",
+  "rentNewFrom": "Nouveau loyer à partir de {month}",
+  "@rentNewFrom": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "rentCorrect": "Corriger le loyer en vigueur",
+  "rentNewHelp": "Les mois précédents gardent l'ancien loyer, même si leurs factures sont recalculées.",
+  "rentCorrectHelp": "Remplace le loyer en vigueur : utile pour corriger une erreur de saisie.",
+  "rentSince": "Loyer depuis {month}",
+  "@rentSince": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "rentFromStart": "Loyer depuis l'entrée",
+  "historySheet": "Fiche historique (PDF)",
+  "historySheetHelp": "Tous les mois du bail : relevés, loyer, pénalités, montant attendu et règlements",
+  "hsTitle": "Fiche historique du logement",
+  "hsMonth": "Mois",
+  "hsNew": "NV",
+  "hsOld": "Ancien",
+  "hsAmount": "Montant",
+  "hsRent": "Loyer",
+  "hsOther": "Services / autres",
+  "hsPenalty": "Pénalité",
+  "hsExpected": "Montant attendu",
+  "hsPaid": "Payé",
+  "hsSettled": "Réglé le",
+  "hsRemarks": "Remarques",
+  "hsPaidFull": "Soldé",
+  "hsPartial": "Reste {amount}",
+  "@hsPartial": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "hsUnpaid": "Impayé",
+  "hsExit": "Sortie",
+  "hsTotals": "Totaux",
+  "hsBalance": "Solde actuel du locataire : {amount}",
+  "@hsBalance": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "hsPrinted": "Édité le {date}",
+  "@hsPrinted": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "hsLease": "Bail du {start} au {end}",
+  "@hsLease": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "firstRent": "Premier loyer (payé à la signature)",
+  "firstRentFlat": "Forfait",
+  "firstRentFlatShort": "forfait",
+  "firstRentFlatHelp": "Montant libre pour le premier mois, avec un commentaire.",
+  "firstRentDueAtSigning": "La facture d'entrée est créée à la signature et doit être payée ce jour-là.",
+  "firstRentAmount": "Montant du premier loyer",
+  "firstRentNote": "Commentaire",
+  "firstRentNoteHint": "ex. entrée le 20, arrangement avec le propriétaire",
+  "signSlip": "Bordereau de signature",
+  "signSlipHelp": "Trace de la signature du bail, à remettre au locataire",
+  "bsHousing": "Logement",
+  "bsTerms": "Conditions convenues",
+  "bsSigningDate": "Date de signature et d'entrée",
+  "bsPlannedEnd": "Fin prévue",
+  "bsDueRule": "Le loyer est payable au plus tard le {day} de chaque mois ; le premier loyer se paie à la signature.",
+  "@bsDueRule": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "bsNoService": "Aucun service",
+  "bsMeter": "Compteur",
+  "bsIndex": "Index",
+  "bsAtSigning": "À régler à la signature",
+  "bsFirstInvoice": "Première facture ({number})",
+  "@bsFirstInvoice": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "bsDepositLeft": "Caution restant à verser",
+  "bsRemaining": "Reste à payer",
+  "bsDisclaimer": "Ce bordereau atteste de la signature du bail aux conditions ci-dessus. Il ne remplace pas le contrat de bail.",
+  "yes": "Oui"
 }

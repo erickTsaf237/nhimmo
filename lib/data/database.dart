@@ -26,6 +26,9 @@ class Buildings extends Table {
   TextColumn get name => text()();
   TextColumn get address => text().nullable()();
   TextColumn get notes => text().nullable()();
+
+  /// Pénalité de retard par défaut des appartements de l'immeuble (centimes).
+  IntColumn get latePenalty => integer().withDefault(const Constant(0))();
 }
 
 class Apartments extends Table {
@@ -39,6 +42,9 @@ class Apartments extends Table {
   IntColumn get rent => integer().withDefault(const Constant(0))();
   IntColumn get deposit => integer().withDefault(const Constant(0))();
   BoolColumn get archived => boolean().withDefault(const Constant(false))();
+
+  /// Pénalité de retard propre à l'appartement ; null = celle de l'immeuble.
+  IntColumn get latePenalty => integer().nullable()();
 }
 
 class Tenants extends Table {
@@ -73,6 +79,22 @@ class UtilityTypes extends Table {
   TextColumn get translations => text().nullable()();
   IntColumn get colorValue => integer().withDefault(const Constant(0xFF0E7C7B))();
   BoolColumn get active => boolean().withDefault(const Constant(true))();
+}
+
+/// Historique des tarifs d'un type de compteur : chaque tarif s'applique à partir d'un mois
+/// (fromPeriod = aaaamm ; [UtilityTariffs.origin] = depuis toujours). Le tarif d'un mois est
+/// celui dont fromPeriod est le plus grand parmi ceux <= ce mois.
+class UtilityTariffs extends Table {
+  static const origin = 190001;
+
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get utilityTypeId => integer().references(UtilityTypes, #id)();
+  IntColumn get fromPeriod => integer()();
+  IntColumn get unitPrice => integer()();
+  IntColumn get fixedFee => integer().withDefault(const Constant(0))();
+  RealColumn get vatRate => real().withDefault(const Constant(0))();
+  IntColumn get vatMode => integer().withDefault(const Constant(0))();
+  BoolColumn get vatOnFixedFee => boolean().withDefault(const Constant(false))();
 }
 
 class Meters extends Table {
@@ -117,6 +139,11 @@ class Contracts extends Table {
   /// Mois d'entrée : au prorata des jours (true) ou mois complet (false).
   BoolColumn get entryProrata => boolean().withDefault(const Constant(true))();
 
+  /// Premier loyer (payé à la signature) : 0 = au prorata, 1 = mois complet, 2 = montant forfaitaire.
+  IntColumn get firstRentMode => integer().withDefault(const Constant(0))();
+  IntColumn get firstRentAmount => integer().nullable()();
+  TextColumn get firstRentNote => text().nullable()();
+
   /// 0 = actif, 1 = terminé.
   IntColumn get status => integer().withDefault(const Constant(0))();
   DateTimeColumn get exitDate => dateTime().nullable()();
@@ -124,6 +151,15 @@ class Contracts extends Table {
   IntColumn get damagesAmount => integer().withDefault(const Constant(0))();
   TextColumn get exitNotes => text().nullable()();
   TextColumn get notes => text().nullable()();
+}
+
+/// Historique du loyer d'un contrat : chaque montant s'applique à partir d'un mois
+/// (fromPeriod = aaaamm ; [UtilityTariffs.origin] = depuis l'entrée).
+class ContractRents extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get contractId => integer().references(Contracts, #id)();
+  IntColumn get fromPeriod => integer()();
+  IntColumn get rent => integer()();
 }
 
 /// Services souscrits : quantité, franchise incluse (ex. 1 véhicule gratuit) et prix unitaire.
@@ -205,7 +241,8 @@ class InvoiceLines extends Table {
 }
 
 /// kind : 0 = paiement du locataire, 1 = caution imputée, 2 = remboursement au locataire,
-/// 3 = caution reçue (complément de caution, hors compte locatif).
+/// 3 = caution reçue (complément de caution, hors compte locatif),
+/// 4 = pénalité de retard (ajoutée à ce que doit le locataire).
 class Payments extends Table {
   IntColumn get id => integer().autoIncrement()();
   IntColumn get contractId => integer().references(Contracts, #id)();
@@ -252,10 +289,12 @@ class Settings extends Table {
   Apartments,
   Tenants,
   UtilityTypes,
+  UtilityTariffs,
   Meters,
   ServiceTypes,
   Contracts,
   ContractServices,
+  ContractRents,
   ContractBenefits,
   Readings,
   Invoices,
@@ -281,7 +320,7 @@ class AppDatabase extends _$AppDatabase {
   }
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -301,29 +340,71 @@ class AppDatabase extends _$AppDatabase {
             await m.addColumn(invoiceLines, invoiceLines.meta);
             await _translateSeeds();
           }
+          if (from < 5) {
+            await m.addColumn(buildings, buildings.latePenalty);
+            await m.addColumn(apartments, apartments.latePenalty);
+            await m.createTable(contractRents);
+            await backfillRents();
+            await m.addColumn(contracts, contracts.firstRentMode);
+            await m.addColumn(contracts, contracts.firstRentAmount);
+            await m.addColumn(contracts, contracts.firstRentNote);
+            await customStatement('UPDATE contracts SET first_rent_mode = CASE WHEN entry_prorata = 1 THEN 0 ELSE 1 END');
+          }
+          if (from < 4) {
+            await m.createTable(utilityTariffs);
+            await backfillTariffs();
+          }
         },
         beforeOpen: (details) async {
           await customStatement('PRAGMA foreign_keys = ON');
         },
       );
 
+  /// Migration v4 : le tarif existant de chaque type devient son tarif « depuis toujours ».
+  Future<void> backfillTariffs() => customStatement(
+        'INSERT INTO utility_tariffs (utility_type_id, from_period, unit_price, fixed_fee, vat_rate, vat_mode, vat_on_fixed_fee) '
+        'SELECT id, ${UtilityTariffs.origin}, unit_price, fixed_fee, vat_rate, vat_mode, vat_on_fixed_fee FROM utility_types '
+        'WHERE id NOT IN (SELECT utility_type_id FROM utility_tariffs)',
+      );
+
+  /// Migration v5 : le loyer actuel de chaque contrat devient son loyer « depuis l'entrée ».
+  Future<void> backfillRents() => customStatement(
+        'INSERT INTO contract_rents (contract_id, from_period, rent) '
+        'SELECT id, ${UtilityTariffs.origin}, rent FROM contracts '
+        'WHERE id NOT IN (SELECT contract_id FROM contract_rents)',
+      );
+
   Future<void> _seed() async {
-    await into(utilityTypes).insert(UtilityTypesCompanion.insert(
+    // Tarifs par défaut : eau 368 F/m³ + TVA 19,25 % en sus + 200 F d'entretien ;
+    // électricité 110 F/kWh TVA incluse + 200 F d'entretien. Modifiables (avec historique) dans les paramètres.
+    final water = await into(utilityTypes).insert(UtilityTypesCompanion.insert(
       name: 'Eau',
       unit: 'm³',
-      unitPrice: 50000,
+      unitPrice: 36800,
+      fixedFee: const Value(20000),
+      vatRate: const Value(19.25),
+      vatMode: const Value(2),
       iconKey: const Value('water'),
       colorValue: const Value(0xFF1E88E5),
       translations: const Value('{"en":"Water"}'),
     ));
-    await into(utilityTypes).insert(UtilityTypesCompanion.insert(
+    final elec = await into(utilityTypes).insert(UtilityTypesCompanion.insert(
       name: 'Électricité',
       unit: 'kWh',
-      unitPrice: 10000,
+      unitPrice: 11000,
+      fixedFee: const Value(20000),
+      vatRate: const Value(19.25),
+      vatMode: const Value(1),
       iconKey: const Value('bolt'),
       colorValue: const Value(0xFFF9A825),
       translations: const Value('{"en":"Electricity"}'),
     ));
+    await into(utilityTariffs).insert(UtilityTariffsCompanion.insert(
+        utilityTypeId: water, fromPeriod: UtilityTariffs.origin, unitPrice: 36800,
+        fixedFee: const Value(20000), vatRate: const Value(19.25), vatMode: const Value(2)));
+    await into(utilityTariffs).insert(UtilityTariffsCompanion.insert(
+        utilityTypeId: elec, fromPeriod: UtilityTariffs.origin, unitPrice: 11000,
+        fixedFee: const Value(20000), vatRate: const Value(19.25), vatMode: const Value(1)));
     await into(serviceTypes).insert(ServiceTypesCompanion.insert(
       name: 'Parking',
       unitPrice: 500000,

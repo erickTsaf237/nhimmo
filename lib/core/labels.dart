@@ -132,6 +132,7 @@ class LineText {
     switch (m['t']) {
       case 'rent':
         final base = t.lineRent(Period.label(m['p'] as int, lang));
+        if (m['flat'] == true) return '$base (${t.firstRentFlatShort})';
         return m['d'] == m['n'] ? base : '$base (${t.lineProrata('${m['d']}', '${m['n']}')})';
       case 'svc':
         final s = book.services[m['sid']];
@@ -183,7 +184,9 @@ class LineText {
         final s = book.services[m['sid']];
         final unit = u?.unit ?? (s == null ? '' : Labels.serviceUnit(s, lang));
         return Labels.benefitSummary(t, m['m'] as int, ((m['v'] as num?) ?? 0).toDouble(), (m['a'] as int?) ?? 0, unit, lang);
-      case 'rent' || 'dmg' || 'credit':
+      case 'rent':
+        return m['flat'] == true ? m['note'] as String? : null;
+      case 'dmg' || 'credit':
         return null;
       default:
         return l.details;

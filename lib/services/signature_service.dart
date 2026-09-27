@@ -8,7 +8,8 @@ import 'app_state.dart';
 enum DocType {
   invoice('F'),
   receipt('Q'),
-  exit('S');
+  exit('S'),
+  signing('B');
 
   final String code;
   const DocType(this.code);

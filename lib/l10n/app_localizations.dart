@@ -4002,6 +4002,444 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Reçu de {tenant}, locataire de {place}, au titre de la caution, la somme de :'**
   String pdfDepositReceivedText(String tenant, String place);
+
+  /// No description provided for @tariffNewFrom.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau tarif à partir de {month}'**
+  String tariffNewFrom(String month);
+
+  /// No description provided for @tariffCorrect.
+  ///
+  /// In fr, this message translates to:
+  /// **'Corriger le tarif en vigueur'**
+  String get tariffCorrect;
+
+  /// No description provided for @tariffNewHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les mois précédents gardent l\'ancien tarif, même si leurs factures sont recalculées.'**
+  String get tariffNewHelp;
+
+  /// No description provided for @tariffCorrectHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remplace le tarif en vigueur ({since}) : utile pour corriger une erreur de saisie.'**
+  String tariffCorrectHelp(String since);
+
+  /// No description provided for @tariffHistory.
+  ///
+  /// In fr, this message translates to:
+  /// **'Historique des tarifs'**
+  String get tariffHistory;
+
+  /// No description provided for @tariffOrigin.
+  ///
+  /// In fr, this message translates to:
+  /// **'Depuis toujours'**
+  String get tariffOrigin;
+
+  /// No description provided for @tariffSince.
+  ///
+  /// In fr, this message translates to:
+  /// **'Depuis {month}'**
+  String tariffSince(String month);
+
+  /// No description provided for @tariffCurrent.
+  ///
+  /// In fr, this message translates to:
+  /// **'En vigueur'**
+  String get tariffCurrent;
+
+  /// No description provided for @deleteTariffQ.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer ce tarif ?'**
+  String get deleteTariffQ;
+
+  /// No description provided for @deleteTariffHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les mois concernés utiliseront le tarif précédent lors des prochains calculs. Les factures verrouillées ne changent pas.'**
+  String get deleteTariffHelp;
+
+  /// No description provided for @latePenalty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pénalité de retard'**
+  String get latePenalty;
+
+  /// No description provided for @latePenaltyHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le locataire paie en retard : la pénalité s\'ajoute à ce qu\'il doit.'**
+  String get latePenaltyHelp;
+
+  /// No description provided for @latePenaltyAmount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant de la pénalité'**
+  String get latePenaltyAmount;
+
+  /// No description provided for @latePenaltyScope.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modifier ce montant ne change que la pénalité de cet appartement. Pour tous, modifiez celle de l\'immeuble.'**
+  String get latePenaltyScope;
+
+  /// No description provided for @recomputingExpected.
+  ///
+  /// In fr, this message translates to:
+  /// **'Calcul du nouveau montant attendu…'**
+  String get recomputingExpected;
+
+  /// No description provided for @newExpectedTotal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau montant attendu'**
+  String get newExpectedTotal;
+
+  /// No description provided for @buildingPenalty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pénalité de retard par défaut'**
+  String get buildingPenalty;
+
+  /// No description provided for @buildingPenaltyHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'S\'applique à tous les appartements de l\'immeuble qui n\'ont pas leur propre pénalité.'**
+  String get buildingPenaltyHelp;
+
+  /// No description provided for @aptPenalty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pénalité de retard de l\'appartement'**
+  String get aptPenalty;
+
+  /// No description provided for @aptPenaltyHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vide : pénalité de l\'immeuble ({amount}).'**
+  String aptPenaltyHelp(String amount);
+
+  /// No description provided for @penaltyKind.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pénalité de retard'**
+  String get penaltyKind;
+
+  /// No description provided for @rentNewFrom.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouveau loyer à partir de {month}'**
+  String rentNewFrom(String month);
+
+  /// No description provided for @rentCorrect.
+  ///
+  /// In fr, this message translates to:
+  /// **'Corriger le loyer en vigueur'**
+  String get rentCorrect;
+
+  /// No description provided for @rentNewHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les mois précédents gardent l\'ancien loyer, même si leurs factures sont recalculées.'**
+  String get rentNewHelp;
+
+  /// No description provided for @rentCorrectHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remplace le loyer en vigueur : utile pour corriger une erreur de saisie.'**
+  String get rentCorrectHelp;
+
+  /// No description provided for @rentSince.
+  ///
+  /// In fr, this message translates to:
+  /// **'Loyer depuis {month}'**
+  String rentSince(String month);
+
+  /// No description provided for @rentFromStart.
+  ///
+  /// In fr, this message translates to:
+  /// **'Loyer depuis l\'entrée'**
+  String get rentFromStart;
+
+  /// No description provided for @historySheet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fiche historique (PDF)'**
+  String get historySheet;
+
+  /// No description provided for @historySheetHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tous les mois du bail : relevés, loyer, pénalités, montant attendu et règlements'**
+  String get historySheetHelp;
+
+  /// No description provided for @hsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fiche historique du logement'**
+  String get hsTitle;
+
+  /// No description provided for @hsMonth.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mois'**
+  String get hsMonth;
+
+  /// No description provided for @hsNew.
+  ///
+  /// In fr, this message translates to:
+  /// **'NV'**
+  String get hsNew;
+
+  /// No description provided for @hsOld.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ancien'**
+  String get hsOld;
+
+  /// No description provided for @hsAmount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant'**
+  String get hsAmount;
+
+  /// No description provided for @hsRent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Loyer'**
+  String get hsRent;
+
+  /// No description provided for @hsOther.
+  ///
+  /// In fr, this message translates to:
+  /// **'Services / autres'**
+  String get hsOther;
+
+  /// No description provided for @hsPenalty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pénalité'**
+  String get hsPenalty;
+
+  /// No description provided for @hsExpected.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant attendu'**
+  String get hsExpected;
+
+  /// No description provided for @hsPaid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Payé'**
+  String get hsPaid;
+
+  /// No description provided for @hsSettled.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réglé le'**
+  String get hsSettled;
+
+  /// No description provided for @hsRemarks.
+  ///
+  /// In fr, this message translates to:
+  /// **'Remarques'**
+  String get hsRemarks;
+
+  /// No description provided for @hsPaidFull.
+  ///
+  /// In fr, this message translates to:
+  /// **'Soldé'**
+  String get hsPaidFull;
+
+  /// No description provided for @hsPartial.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reste {amount}'**
+  String hsPartial(String amount);
+
+  /// No description provided for @hsUnpaid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impayé'**
+  String get hsUnpaid;
+
+  /// No description provided for @hsExit.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sortie'**
+  String get hsExit;
+
+  /// No description provided for @hsTotals.
+  ///
+  /// In fr, this message translates to:
+  /// **'Totaux'**
+  String get hsTotals;
+
+  /// No description provided for @hsBalance.
+  ///
+  /// In fr, this message translates to:
+  /// **'Solde actuel du locataire : {amount}'**
+  String hsBalance(String amount);
+
+  /// No description provided for @hsPrinted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Édité le {date}'**
+  String hsPrinted(String date);
+
+  /// No description provided for @hsLease.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bail du {start} au {end}'**
+  String hsLease(String start, String end);
+
+  /// No description provided for @firstRent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Premier loyer (payé à la signature)'**
+  String get firstRent;
+
+  /// No description provided for @firstRentFlat.
+  ///
+  /// In fr, this message translates to:
+  /// **'Forfait'**
+  String get firstRentFlat;
+
+  /// No description provided for @firstRentFlatShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'forfait'**
+  String get firstRentFlatShort;
+
+  /// No description provided for @firstRentFlatHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant libre pour le premier mois, avec un commentaire.'**
+  String get firstRentFlatHelp;
+
+  /// No description provided for @firstRentDueAtSigning.
+  ///
+  /// In fr, this message translates to:
+  /// **'La facture d\'entrée est créée à la signature et doit être payée ce jour-là.'**
+  String get firstRentDueAtSigning;
+
+  /// No description provided for @firstRentAmount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montant du premier loyer'**
+  String get firstRentAmount;
+
+  /// No description provided for @firstRentNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Commentaire'**
+  String get firstRentNote;
+
+  /// No description provided for @firstRentNoteHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'ex. entrée le 20, arrangement avec le propriétaire'**
+  String get firstRentNoteHint;
+
+  /// No description provided for @signSlip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bordereau de signature'**
+  String get signSlip;
+
+  /// No description provided for @signSlipHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Trace de la signature du bail, à remettre au locataire'**
+  String get signSlipHelp;
+
+  /// No description provided for @bsHousing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Logement'**
+  String get bsHousing;
+
+  /// No description provided for @bsTerms.
+  ///
+  /// In fr, this message translates to:
+  /// **'Conditions convenues'**
+  String get bsTerms;
+
+  /// No description provided for @bsSigningDate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Date de signature et d\'entrée'**
+  String get bsSigningDate;
+
+  /// No description provided for @bsPlannedEnd.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fin prévue'**
+  String get bsPlannedEnd;
+
+  /// No description provided for @bsDueRule.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le loyer est payable au plus tard le {day} de chaque mois ; le premier loyer se paie à la signature.'**
+  String bsDueRule(String day);
+
+  /// No description provided for @bsNoService.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun service'**
+  String get bsNoService;
+
+  /// No description provided for @bsMeter.
+  ///
+  /// In fr, this message translates to:
+  /// **'Compteur'**
+  String get bsMeter;
+
+  /// No description provided for @bsIndex.
+  ///
+  /// In fr, this message translates to:
+  /// **'Index'**
+  String get bsIndex;
+
+  /// No description provided for @bsAtSigning.
+  ///
+  /// In fr, this message translates to:
+  /// **'À régler à la signature'**
+  String get bsAtSigning;
+
+  /// No description provided for @bsFirstInvoice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Première facture ({number})'**
+  String bsFirstInvoice(String number);
+
+  /// No description provided for @bsDepositLeft.
+  ///
+  /// In fr, this message translates to:
+  /// **'Caution restant à verser'**
+  String get bsDepositLeft;
+
+  /// No description provided for @bsRemaining.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reste à payer'**
+  String get bsRemaining;
+
+  /// No description provided for @bsDisclaimer.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce bordereau atteste de la signature du bail aux conditions ci-dessus. Il ne remplace pas le contrat de bail.'**
+  String get bsDisclaimer;
+
+  /// No description provided for @yes.
+  ///
+  /// In fr, this message translates to:
+  /// **'Oui'**
+  String get yes;
 }
 
 class _AppLocalizationsDelegate

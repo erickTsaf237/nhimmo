@@ -9,6 +9,8 @@ import '../core/labels.dart';
 import '../data/database.dart';
 import '../data/repo.dart';
 import 'app_state.dart';
+import 'rent_service.dart';
+import 'tariff_service.dart';
 
 /// Ligne de facture avant enregistrement.
 class LineDraft {
@@ -126,9 +128,37 @@ class BillingService {
   static String _exitNumber(int period, int contractId) =>
       'S$period-${contractId.toString().padLeft(3, '0')}';
 
-  static DateTime dueDateFor(int period) {
+  /// Date limite de paiement : le jour fixé dans les paramètres (10 par défaut),
+  /// sauf le mois d'entrée où le loyer se paie à la signature du contrat.
+  static DateTime dueDateFor(int period, [Contract? c]) {
+    if (c != null && Period.of(c.startDate) == period) return Dates.dayOnly(c.startDate);
     final day = App.settings.dueDay.clamp(1, Period.daysIn(period));
     return DateTime(Period.year(period), Period.month(period), day);
+  }
+
+  /// Loyer et services d'un mois, en tenant compte du mode choisi pour le premier loyer
+  /// (prorata, mois complet ou montant forfaitaire avec commentaire).
+  static Future<List<LineDraft>> monthLines(Contract c, int period) async {
+    final days = BillingCalc.occupiedDays(period, c.startDate, null);
+    if (Period.of(c.startDate) != period) return rentAndServices(c, period, days, false);
+    switch (c.firstRentMode) {
+      case 1:
+        return rentAndServices(c, period, days, false);
+      case 2:
+        final lines = await rentAndServices(c, period, days, false);
+        final flat = c.firstRentAmount ?? 0;
+        lines[0] = LineDraft(
+          kind: 0,
+          label: '',
+          unitPrice: flat,
+          ht: flat,
+          ttc: flat,
+          meta: {'t': 'rent', 'p': period, 'flat': true, 'note': c.firstRentNote},
+        );
+        return lines;
+      default:
+        return rentAndServices(c, period, days, true);
+    }
   }
 
   /// Index de départ d'un compteur pour un contrat : dernière facture, sinon
@@ -163,16 +193,17 @@ class BillingService {
     return before?.value ?? m.initialIndex;
   }
 
-  static LineDraft utilityLine(MeterView mv, double start, double end) {
+  /// Ligne de consommation calculée avec le tarif en vigueur pour [period].
+  static LineDraft utilityLine(MeterView mv, double start, double end, Tariff tariff) {
     final t = mv.type;
     final cons = end - start;
-    final charge = BillingCalc.utility(cons < 0 ? 0 : cons, mv.tariff);
+    final charge = BillingCalc.utility(cons < 0 ? 0 : cons, tariff);
     return LineDraft(
       kind: 1,
       label: t.name,
       quantity: cons,
       unit: t.unit,
-      unitPrice: t.unitPrice,
+      unitPrice: tariff.unitPrice,
       ht: charge.ht,
       vat: charge.vat,
       ttc: charge.ttc,
@@ -180,7 +211,7 @@ class BillingService {
       utilityTypeId: t.id,
       startIndex: start,
       endIndex: end,
-      meta: {'t': 'util', 'uid': t.id, 'fee': t.fixedFee, 'vr': t.vatRate, 'vm': t.vatMode},
+      meta: {'t': 'util', 'uid': t.id, 'fee': tariff.fixedFee, 'vr': tariff.vatRate, 'vm': tariff.vatMode.index},
     );
   }
 
@@ -213,7 +244,7 @@ class BillingService {
   static Future<List<LineDraft>> applyBenefits(Contract c, int period, List<LineDraft> lines) async {
     final list = (await benefits(c.id)).where((b) => Benefits.activeIn(period, b.fromPeriod, b.toPeriod)).toList();
     if (list.isEmpty) return lines;
-    final tariffs = {for (final t in await db.select(db.utilityTypes).get()) t.id: Repo.tariffOf(t)};
+    final book = await TariffBook.load();
     final out = <LineDraft>[];
     for (final l in lines) {
       out.add(l);
@@ -223,7 +254,7 @@ class BillingService {
         final match = l.kind == 1 ? b.utilityTypeId != null && b.utilityTypeId == l.utilityTypeId : b.serviceTypeId != null && b.serviceTypeId == l.serviceTypeId;
         if (!match || remaining <= 0) continue;
         final mode = BenefitMode.values[b.mode];
-        final t = l.utilityTypeId == null ? null : tariffs[l.utilityTypeId];
+        final t = l.utilityTypeId == null ? null : book.at(l.utilityTypeId!, period);
         final d = Benefits.discount(mode,
             lineTtc: remaining, value: b.value, amount: b.amount,
             consumption: l.kind == 1 ? l.quantity : null, tariff: t);
@@ -253,12 +284,14 @@ class BillingService {
     final dim = Period.daysIn(period);
     final full = days >= dim || !prorata;
     final d = full ? dim : days;
-    final rent = full ? c.rent : BillingCalc.prorata(c.rent, days, dim);
+    // Loyer en vigueur pour ce mois (historique) : un changement de loyer n'affecte pas les mois passés.
+    final monthly = await RentService.rentAt(c, period);
+    final rent = full ? monthly : BillingCalc.prorata(monthly, days, dim);
     final out = <LineDraft>[
       LineDraft(
         kind: 0,
         label: '',
-        unitPrice: c.rent,
+        unitPrice: monthly,
         ht: rent,
         ttc: rent,
         meta: {'t': 'rent', 'p': period, 'd': d, 'n': dim},
@@ -287,29 +320,43 @@ class BillingService {
   /// Génère (ou régénère si non verrouillées) les factures du mois pour tous les contrats actifs.
   static Future<GenerationReport> generateMonth(int period) async {
     final report = GenerationReport();
-    final active = await Repo.contracts(status: 0);
-    for (final cv in active) {
-      final c = cv.c;
-      if (Period.of(c.startDate) > period) continue;
+    final book = await TariffBook.load();
+    for (final cv in await Repo.contracts(status: 0)) {
+      await _generateFor(cv, period, report, book);
+    }
+    return report;
+  }
 
-      final existing = await (db.select(db.invoices)
-            ..where((i) => i.contractId.equals(c.id) & i.period.equals(period) & i.kind.equals(0)))
+  /// Facture du mois d'entrée, créée dès la signature : le locataire paie avant d'entrer.
+  /// Elle sera complétée (consommations) si elle est recalculée avec les relevés du mois.
+  static Future<GenerationReport> generateEntryInvoice(int contractId) async {
+    final report = GenerationReport();
+    final cv = await Repo.contract(contractId);
+    await _generateFor(cv, Period.of(cv.c.startDate), report, await TariffBook.load(), entryOnly: true);
+    return report;
+  }
+
+  static Future<void> _generateFor(ContractView cv, int period, GenerationReport report, TariffBook book,
+      {bool entryOnly = false}) async {
+    final c = cv.c;
+    if (Period.of(c.startDate) > period) return;
+
+    final existing = await (db.select(db.invoices)
+          ..where((i) => i.contractId.equals(c.id) & i.period.equals(period) & i.kind.equals(0)))
+        .getSingleOrNull();
+    if (existing != null) {
+      final later = await (db.select(db.invoices)
+            ..where((i) => i.contractId.equals(c.id) & i.period.isBiggerThanValue(period))
+            ..limit(1))
           .getSingleOrNull();
-      if (existing != null) {
-        final later = await (db.select(db.invoices)
-              ..where((i) => i.contractId.equals(c.id) & i.period.isBiggerThanValue(period))
-              ..limit(1))
-            .getSingleOrNull();
-        if (later != null) {
-          report.locked++;
-          continue;
-        }
+      if (later != null) {
+        report.locked++;
+        return;
       }
+    }
 
-      final days = BillingCalc.occupiedDays(period, c.startDate, null);
-      final isEntryMonth = Period.of(c.startDate) == period;
-      final lines = await rentAndServices(c, period, days, isEntryMonth && c.entryProrata);
-
+    final lines = await monthLines(c, period);
+    if (!entryOnly) {
       for (final mv in await Repo.activeMeters(apartmentId: c.apartmentId)) {
         final r = await Repo.monthlyReading(mv.meter.id, period);
         if (r == null) {
@@ -320,36 +367,35 @@ class BillingService {
         if (r.value < start) {
           report.warnings.add(I18n.ui.warnIndexLower(cv.place, Labels.utilityName(mv.type)));
         }
-        lines.add(utilityLine(mv, start, r.value));
+        lines.add(utilityLine(mv, start, r.value, book.at(mv.type.id, period)));
       }
-
-      final billed = await localize(await applyBenefits(c, period, lines));
-      final total = billed.fold<int>(0, (s, l) => s + l.ttc);
-      await db.transaction(() async {
-        int invoiceId;
-        if (existing != null) {
-          invoiceId = existing.id;
-          await (db.delete(db.invoiceLines)..where((l) => l.invoiceId.equals(invoiceId))).go();
-          await (db.update(db.invoices)..where((i) => i.id.equals(invoiceId))).write(
-              InvoicesCompanion(total: Value(total), issueDate: Value(DateTime.now())));
-          report.updated++;
-        } else {
-          invoiceId = await db.into(db.invoices).insert(InvoicesCompanion.insert(
-                number: _monthlyNumber(period, c.id),
-                contractId: c.id,
-                period: period,
-                issueDate: DateTime.now(),
-                dueDate: dueDateFor(period),
-                total: total,
-              ));
-          report.created++;
-        }
-        for (var i = 0; i < billed.length; i++) {
-          await db.into(db.invoiceLines).insert(billed[i].toCompanion(invoiceId, i));
-        }
-      });
     }
-    return report;
+
+    final billed = await localize(await applyBenefits(c, period, lines));
+    final total = billed.fold<int>(0, (s, l) => s + l.ttc);
+    await db.transaction(() async {
+      int invoiceId;
+      if (existing != null) {
+        invoiceId = existing.id;
+        await (db.delete(db.invoiceLines)..where((l) => l.invoiceId.equals(invoiceId))).go();
+        await (db.update(db.invoices)..where((i) => i.id.equals(invoiceId))).write(
+            InvoicesCompanion(total: Value(total), issueDate: Value(DateTime.now())));
+        report.updated++;
+      } else {
+        invoiceId = await db.into(db.invoices).insert(InvoicesCompanion.insert(
+              number: _monthlyNumber(period, c.id),
+              contractId: c.id,
+              period: period,
+              issueDate: DateTime.now(),
+              dueDate: dueDateFor(period, c),
+              total: total,
+            ));
+        report.created++;
+      }
+      for (var i = 0; i < billed.length; i++) {
+        await db.into(db.invoiceLines).insert(billed[i].toCompanion(invoiceId, i));
+      }
+    });
   }
 
   static Future<void> deleteInvoice(int invoiceId) => db.transaction(() async {
@@ -374,8 +420,7 @@ class BillingService {
     // Mois non encore facturés avant le mois de sortie.
     final from = lastBilled == null ? startPeriod : Period.add(lastBilled, 1);
     for (var p = from; p < exitPeriod; p = Period.add(p, 1)) {
-      final days = BillingCalc.occupiedDays(p, c.startDate, null);
-      lines.addAll(await applyBenefits(c, p, await rentAndServices(c, p, days, p == startPeriod && c.entryProrata)));
+      lines.addAll(await applyBenefits(c, p, await monthLines(c, p)));
     }
 
     // Mois de sortie.
@@ -403,6 +448,7 @@ class BillingService {
     }
 
     // Consommations jusqu'à l'index de sortie.
+    final book = await TariffBook.load();
     final utilities = <LineDraft>[];
     for (final mv in await Repo.activeMeters(apartmentId: c.apartmentId)) {
       final end = input.exitIndexes[mv.meter.id];
@@ -412,7 +458,7 @@ class BillingService {
       }
       final start = await startIndex(c, mv.meter);
       if (end < start) warnings.add(I18n.ui.warnExitIndexLower(Labels.utilityName(mv.type)));
-      utilities.add(utilityLine(mv, start, end));
+      utilities.add(utilityLine(mv, start, end, book.at(mv.type.id, exitPeriod)));
     }
     lines.addAll(await applyBenefits(c, exitPeriod, utilities));
 
