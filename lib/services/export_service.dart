@@ -154,7 +154,8 @@ class ExportService {
     ];
 
     final balances = <List<Object?>>[
-      [t.pdfTenant, t.xBuilding, t.xApartment, t.lease, t.moveIn, t.moveOut, t.depositPaidShort, t.xBalanceSigned],
+      [t.pdfTenant, t.xBuilding, t.xApartment, t.lease, t.moveIn, t.moveOut, t.depositPaidShort, t.xBalanceSigned,
+        t.balanceDue, t.tenantAdvance],
       for (final cv in await Repo.contracts())
         [
           cv.tenant.fullName,
@@ -165,6 +166,8 @@ class ExportService {
           Dates.d(cv.c.exitDate),
           _amount(cv.c.depositPaid),
           _amount(cv.balance),
+          _amount(cv.due),
+          _amount(cv.advance),
         ],
     ];
 

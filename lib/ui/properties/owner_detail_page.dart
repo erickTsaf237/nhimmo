@@ -47,7 +47,7 @@ class OwnerDetailPage extends StatelessWidget {
           .get();
       collected = pays.fold(0, (s, p) => s + p.amount);
     }
-    final outstanding = contracts.fold<int>(0, (s, c) => s + (c.balance > 0 ? c.balance : 0));
+    final outstanding = contracts.fold<int>(0, (s, c) => s + c.due);
     return _Data(owner, buildings, apts, billed, collected, outstanding);
   }
 

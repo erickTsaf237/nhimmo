@@ -46,6 +46,9 @@ class AppSettings extends ChangeNotifier {
   String currencySymbol = 'FCFA';
   bool symbolBefore = false;
   int dueDay = 10;
+
+  /// Imputation de l'avance par défaut (index de AdvanceMode) ; modifiable par contrat.
+  int advanceMode = 0;
   String invoiceFooter = '';
 
   /// 'system' ou un code de langue ('fr', 'en'...).
@@ -62,6 +65,7 @@ class AppSettings extends ChangeNotifier {
     currencySymbol = m['currencySymbol'] ?? 'FCFA';
     symbolBefore = m['symbolBefore'] == '1';
     dueDay = int.tryParse(m['dueDay'] ?? '') ?? 10;
+    advanceMode = int.tryParse(m['advanceMode'] ?? '') ?? 0;
     invoiceFooter = m['invoiceFooter'] ?? '';
     appLanguage = m['appLanguage'] ?? 'system';
     _apply();
@@ -77,6 +81,7 @@ class AppSettings extends ChangeNotifier {
       'currencySymbol': currencySymbol,
       'symbolBefore': symbolBefore ? '1' : '0',
       'dueDay': '$dueDay',
+      'advanceMode': '$advanceMode',
       'invoiceFooter': invoiceFooter,
       'appLanguage': appLanguage,
     };

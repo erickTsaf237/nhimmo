@@ -2464,4 +2464,37 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get yes => 'Yes';
+
+  @override
+  String get advanceUse => 'Use of advance payments';
+
+  @override
+  String get advanceRentAndCharges => 'Rent and charges';
+
+  @override
+  String get advanceRentOnly => 'Rent only';
+
+  @override
+  String advanceFollowApp(String mode) {
+    return 'App setting ($mode)';
+  }
+
+  @override
+  String get appSettingShort => 'app setting';
+
+  @override
+  String get advanceHelp =>
+      'When the tenant has paid in advance, the advance settles the next invoices: either in full, or the rent only (charges remain to be paid).';
+
+  @override
+  String get advancePerTenant => 'Each lease can have its own setting.';
+
+  @override
+  String advanceOnRent(String amount) {
+    return 'Advance on rent: $amount';
+  }
+
+  @override
+  String get pdfAdvanceRentOnly =>
+      'The tenant\'s advance only covers the rent; charges must be paid.';
 }

@@ -4440,6 +4440,60 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Oui'**
   String get yes;
+
+  /// No description provided for @advanceUse.
+  ///
+  /// In fr, this message translates to:
+  /// **'Utilisation de l\'avance'**
+  String get advanceUse;
+
+  /// No description provided for @advanceRentAndCharges.
+  ///
+  /// In fr, this message translates to:
+  /// **'Loyer et charges'**
+  String get advanceRentAndCharges;
+
+  /// No description provided for @advanceRentOnly.
+  ///
+  /// In fr, this message translates to:
+  /// **'Loyer uniquement'**
+  String get advanceRentOnly;
+
+  /// No description provided for @advanceFollowApp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réglage de l\'application ({mode})'**
+  String advanceFollowApp(String mode);
+
+  /// No description provided for @appSettingShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'réglage de l\'app'**
+  String get appSettingShort;
+
+  /// No description provided for @advanceHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Quand le locataire a payé d\'avance, cette avance règle les factures suivantes : soit en entier, soit uniquement le loyer (les charges restent à payer).'**
+  String get advanceHelp;
+
+  /// No description provided for @advancePerTenant.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chaque bail peut avoir son propre réglage.'**
+  String get advancePerTenant;
+
+  /// No description provided for @advanceOnRent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Avance sur le loyer : {amount}'**
+  String advanceOnRent(String amount);
+
+  /// No description provided for @pdfAdvanceRentOnly.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'avance du locataire ne règle que le loyer ; les charges sont à payer.'**
+  String get pdfAdvanceRentOnly;
 }
 
 class _AppLocalizationsDelegate

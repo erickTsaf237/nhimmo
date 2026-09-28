@@ -117,9 +117,12 @@ class ApartmentTile extends StatelessWidget {
                 style: TextStyle(color: cs.onSurfaceVariant, fontSize: 13)),
             const SizedBox(height: 6),
             Row(children: [
-              StatusChip(a.occupied ? a.tenant!.fullName : context.t.free,
-                  a.occupied ? AppColors.success : AppColors.warning,
-                  icon: a.occupied ? Icons.person_rounded : Icons.key_rounded),
+              // Nom long : tronqué pour laisser la place aux compteurs et au loyer.
+              Flexible(
+                child: StatusChip(a.occupied ? a.tenant!.fullName : context.t.free,
+                    a.occupied ? AppColors.success : AppColors.warning,
+                    icon: a.occupied ? Icons.person_rounded : Icons.key_rounded),
+              ),
               const SizedBox(width: 6),
               for (final m in a.meters)
                 Padding(
@@ -129,6 +132,7 @@ class ApartmentTile extends StatelessWidget {
             ]),
           ]),
         ),
+        const SizedBox(width: 8),
         Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
           Text(Money.compact(a.contract?.rent ?? a.apt.rent), style: const TextStyle(fontWeight: FontWeight.w800)),
           Text(context.t.perMonth, style: TextStyle(fontSize: 11, color: cs.onSurfaceVariant)),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/advance.dart';
 import '../../core/i18n.dart';
 import '../../core/money.dart';
 import '../../services/app_state.dart';
@@ -106,6 +107,7 @@ class _GeneralSettingsPageState extends State<GeneralSettingsPage> {
   late String _code = s.currencyCode;
   late bool _before = s.symbolBefore;
   late int _dueDay = s.dueDay;
+  late int _advanceMode = s.advanceMode;
   late String _language = s.appLanguage;
 
   @override
@@ -126,6 +128,7 @@ class _GeneralSettingsPageState extends State<GeneralSettingsPage> {
           ..currencySymbol = _symbol.text.trim()
           ..symbolBefore = _before
           ..dueDay = _dueDay
+          ..advanceMode = _advanceMode
           ..appLanguage = _language;
         if (context.mounted) Navigator.pop(context);
         await s.save();
@@ -181,6 +184,23 @@ class _GeneralSettingsPageState extends State<GeneralSettingsPage> {
             IconButton(onPressed: _dueDay > 1 ? () => setState(() => _dueDay--) : null, icon: const Icon(Icons.remove_circle_outline)),
             Text('$_dueDay', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
             IconButton(onPressed: _dueDay < 28 ? () => setState(() => _dueDay++) : null, icon: const Icon(Icons.add_circle_outline)),
+          ]),
+        ),
+        const SizedBox(height: 10),
+        AppCard(
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(t.advanceUse, style: const TextStyle(fontWeight: FontWeight.w600)),
+            const SizedBox(height: 8),
+            SegmentedButton<int>(
+              segments: [
+                ButtonSegment(value: AdvanceMode.all.index, label: Text(t.advanceRentAndCharges)),
+                ButtonSegment(value: AdvanceMode.rentOnly.index, label: Text(t.advanceRentOnly)),
+              ],
+              selected: {_advanceMode},
+              onSelectionChanged: (v) => setState(() => _advanceMode = v.first),
+            ),
+            const SizedBox(height: 8),
+            Text('${t.advanceHelp} ${t.advancePerTenant}', style: const TextStyle(fontSize: 12.5)),
           ]),
         ),
       ],

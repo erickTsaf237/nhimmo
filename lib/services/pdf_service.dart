@@ -3,6 +3,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
+import '../core/advance.dart';
 import '../core/dates.dart';
 import '../core/i18n.dart';
 import '../core/labels.dart';
@@ -203,6 +204,11 @@ class PdfService {
         _totalRow(l, t.creditApplied, -v.alloc.applied),
         _totalRow(l, t.remainingToPay, v.remaining, strong: true, color: v.remaining > 0 ? PdfColors.red700 : PdfColors.green700),
         if (v.alloc.creditAfter > 0) _totalRow(l, t.creditRemaining, v.alloc.creditAfter),
+        if (v.cv.advanceMode == AdvanceMode.rentOnly)
+          pw.Align(
+            alignment: pw.Alignment.centerRight,
+            child: pw.Text(t.pdfAdvanceRentOnly, style: const pw.TextStyle(fontSize: 8.5, color: _muted)),
+          ),
       ],
       if (v.status == PayStatus.paid)
         pw.Align(
@@ -285,7 +291,10 @@ class PdfService {
           pw.Text(
             deposit
                 ? t.depositIncompleteDetail(l.money(pv.cv.c.depositPaid), l.money(pv.cv.c.deposit))
-                : t.pdfBalanceAfter(l.money(pv.cv.balance)),
+                : [
+                    t.pdfBalanceAfter(l.money(pv.cv.due > 0 || pv.cv.advance == 0 ? pv.cv.due : -pv.cv.advance)),
+                    if (pv.cv.due > 0 && pv.cv.advance > 0) t.advanceOnRent(l.money(pv.cv.advance)),
+                  ].join(' · '),
             style: const pw.TextStyle(fontSize: 10, color: _muted),
           ),
           pw.Spacer(),
@@ -662,8 +671,10 @@ class PdfService {
           oddRowDecoration: const pw.BoxDecoration(color: _light),
         ),
         pw.SizedBox(height: 8),
-        pw.Text(t.hsBalance(l.money(cv.balance)),
-            style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold, color: cv.balance > 0 ? PdfColors.red700 : _primary)),
+        pw.Text(t.hsBalance(l.money(cv.due > 0 || cv.advance == 0 ? cv.due : -cv.advance)),
+            style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold, color: cv.due > 0 ? PdfColors.red700 : _primary)),
+        if (cv.due > 0 && cv.advance > 0)
+          pw.Text(t.advanceOnRent(l.money(cv.advance)), style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold, color: _primary)),
       ],
     ));
     return doc.save();

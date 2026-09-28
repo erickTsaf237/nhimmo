@@ -50,8 +50,8 @@ class DashboardPage extends StatelessWidget {
     d.readings = (await (db.select(db.readings)..where((r) => r.period.equals(now) & r.kind.equals(0))).get()).length;
 
     final contracts = await Repo.contracts();
-    d.outstanding = contracts.fold(0, (s, c) => s + (c.balance > 0 ? c.balance : 0));
-    d.debtors.addAll(contracts.where((c) => c.balance > 0).toList()..sort((a, b) => b.balance.compareTo(a.balance)));
+    d.outstanding = contracts.fold(0, (s, c) => s + c.due);
+    d.debtors.addAll(contracts.where((c) => c.due > 0).toList()..sort((a, b) => b.due.compareTo(a.due)));
     d.incompleteDeposits.addAll(contracts.where((c) => c.active && c.c.depositPaid < c.c.deposit));
 
     final unpaid = await Repo.invoices(from: Period.add(now, -24), to: now);
@@ -228,7 +228,7 @@ class DashboardPage extends StatelessWidget {
                           leading: Initials(c.tenant.fullName, size: 38, color: AppColors.danger),
                           title: Text(c.tenant.fullName, style: const TextStyle(fontWeight: FontWeight.w600)),
                           subtitle: Text(c.place),
-                          trailing: Text(Money.format(c.balance), style: const TextStyle(fontWeight: FontWeight.w800, color: AppColors.danger)),
+                          trailing: Text(Money.format(c.due), style: const TextStyle(fontWeight: FontWeight.w800, color: AppColors.danger)),
                         ),
                     ]),
                   ),

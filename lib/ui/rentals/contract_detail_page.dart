@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/advance.dart';
 import '../../core/billing_calc.dart';
 import '../../core/dates.dart';
 import '../../core/money.dart';
@@ -87,7 +88,7 @@ class ContractDetailPage extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  gradient: b > 0
+                  gradient: cv.due > 0
                       ? const LinearGradient(colors: [Color(0xFFB83B3B), Color(0xFF8A2C3C)])
                       : AppColors.heroGradient,
                   borderRadius: BorderRadius.circular(24),
@@ -104,10 +105,19 @@ class ContractDetailPage extends StatelessWidget {
                   ]),
                   const SizedBox(height: 14),
                   Text(
-                    b > 0 ? context.t.remainingToPay : b < 0 ? (cv.active ? context.t.tenantAdvance : context.t.refundToTenant) : context.t.accountUpToDate,
+                    cv.due > 0
+                        ? context.t.remainingToPay
+                        : cv.advance > 0
+                            ? (cv.active ? context.t.tenantAdvance : context.t.refundToTenant)
+                            : context.t.accountUpToDate,
                     style: const TextStyle(color: Colors.white70),
                   ),
-                  Text(Money.format(b.abs()), style: const TextStyle(color: Colors.white, fontSize: 30, fontWeight: FontWeight.w800)),
+                  Text(Money.format(cv.due > 0 ? cv.due : cv.advance),
+                      style: const TextStyle(color: Colors.white, fontSize: 30, fontWeight: FontWeight.w800)),
+                  // Avance « loyer uniquement » : les charges restent dues à côté de l'avance.
+                  if (cv.due > 0 && cv.advance > 0)
+                    Text(context.t.advanceOnRent(Money.format(cv.advance)),
+                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
                   const SizedBox(height: 14),
                   Row(children: [
                     Expanded(
@@ -232,6 +242,10 @@ class ContractDetailPage extends StatelessWidget {
                     2 => '${context.t.firstRentFlat} · ${Money.format(c.firstRentAmount ?? 0)}${c.firstRentNote == null ? '' : ' (${c.firstRentNote})'}',
                     _ => context.t.prorated,
                   }),
+                  InfoRow(
+                      context.t.advanceUse,
+                      '${cv.advanceMode == AdvanceMode.rentOnly ? context.t.advanceRentOnly : context.t.advanceRentAndCharges}'
+                      '${c.advanceMode == null ? ' (${context.t.appSettingShort})' : ''}'),
                   if (c.exitProrata != null) InfoRow(context.t.lastMonth, c.exitProrata! ? context.t.prorated : context.t.fullMonth),
                   if (c.damagesAmount > 0) InfoRow(context.t.damagesRetained, Money.format(c.damagesAmount), color: AppColors.danger),
                   for (final (s, t) in d.services)

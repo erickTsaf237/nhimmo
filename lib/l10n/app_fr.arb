@@ -1600,5 +1600,28 @@
   "bsDepositLeft": "Caution restant à verser",
   "bsRemaining": "Reste à payer",
   "bsDisclaimer": "Ce bordereau atteste de la signature du bail aux conditions ci-dessus. Il ne remplace pas le contrat de bail.",
-  "yes": "Oui"
+  "yes": "Oui",
+  "advanceUse": "Utilisation de l'avance",
+  "advanceRentAndCharges": "Loyer et charges",
+  "advanceRentOnly": "Loyer uniquement",
+  "advanceFollowApp": "Réglage de l'application ({mode})",
+  "@advanceFollowApp": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      }
+    }
+  },
+  "appSettingShort": "réglage de l'app",
+  "advanceHelp": "Quand le locataire a payé d'avance, cette avance règle les factures suivantes : soit en entier, soit uniquement le loyer (les charges restent à payer).",
+  "advancePerTenant": "Chaque bail peut avoir son propre réglage.",
+  "advanceOnRent": "Avance sur le loyer : {amount}",
+  "@advanceOnRent": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "pdfAdvanceRentOnly": "L'avance du locataire ne règle que le loyer ; les charges sont à payer."
 }

@@ -722,5 +722,14 @@
   "bsDepositLeft": "Deposit still to pay",
   "bsRemaining": "Remaining to pay",
   "bsDisclaimer": "This slip records the signing of the lease on the terms above. It does not replace the lease agreement.",
-  "yes": "Yes"
+  "yes": "Yes",
+  "advanceUse": "Use of advance payments",
+  "advanceRentAndCharges": "Rent and charges",
+  "advanceRentOnly": "Rent only",
+  "advanceFollowApp": "App setting ({mode})",
+  "appSettingShort": "app setting",
+  "advanceHelp": "When the tenant has paid in advance, the advance settles the next invoices: either in full, or the rent only (charges remain to be paid).",
+  "advancePerTenant": "Each lease can have its own setting.",
+  "advanceOnRent": "Advance on rent: {amount}",
+  "pdfAdvanceRentOnly": "The tenant's advance only covers the rent; charges must be paid."
 }

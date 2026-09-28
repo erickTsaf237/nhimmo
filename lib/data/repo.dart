@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 
+import '../core/advance.dart';
 import '../core/billing_calc.dart';
 import '../core/dates.dart';
 import '../services/app_state.dart';
@@ -36,9 +37,18 @@ class ContractView {
   final Tenant tenant;
   final Apartment apt;
   final Building building;
+  /// Solde net : factures − paiements (positif = le locataire doit).
   final int balance;
-  ContractView(this.c, this.tenant, this.apt, this.building, this.balance);
 
+  /// Reste dû et avance disponible. Quand l'avance ne règle que le loyer, le locataire peut
+  /// devoir des charges tout en ayant une avance : les deux sont alors non nuls.
+  final int due;
+  final int advance;
+  ContractView(this.c, this.tenant, this.apt, this.building, this.balance, {int? due, int? advance})
+      : due = due ?? (balance > 0 ? balance : 0),
+        advance = advance ?? (balance < 0 ? -balance : 0);
+
+  AdvanceMode get advanceMode => Repo.advanceModeOf(c);
   bool get active => c.status == 0;
   String get place => '${building.name} · ${apt.name}';
 }
@@ -182,11 +192,78 @@ class Repo {
     q.orderBy([OrderingTerm.desc(db.contracts.startDate)]);
     final rows = await q.get();
     final bal = await balances();
-    return rows.map((r) {
-      final c = r.readTable(db.contracts);
-      return ContractView(c, r.readTable(db.tenants), r.readTable(db.apartments),
-          r.readTable(db.buildings), bal[c.id] ?? 0);
-    }).toList();
+    final out = <ContractView>[];
+    for (final r in rows) {
+      out.add(await _view(r.readTable(db.contracts), r.readTable(db.tenants), r.readTable(db.apartments),
+          r.readTable(db.buildings), bal));
+    }
+    return out;
+  }
+
+  static Future<ContractView> _view(Contract c, Tenant t, Apartment a, Building b, Map<int, int> bal) async {
+    if (advanceModeOf(c) == AdvanceMode.all) return ContractView(c, t, a, b, bal[c.id] ?? 0);
+    final l = await ledger(c);
+    return ContractView(c, t, a, b, bal[c.id] ?? 0, due: l.due, advance: l.advance);
+  }
+
+  // ------------------------------------------------------------ avance du locataire
+
+  static AdvanceMode advanceModeOf(Contract c) =>
+      AdvanceMode.values[(c.advanceMode ?? App.settings.advanceMode).clamp(0, AdvanceMode.values.length - 1)];
+
+  /// Part « loyer » de chaque facture (lignes de loyer).
+  static Future<Map<int, int>> rentParts(int contractId) async {
+    final rows = await db.customSelect(
+      'SELECT l.invoice_id AS i, SUM(l.ttc) AS s FROM invoice_lines l '
+      'JOIN invoices v ON v.id = l.invoice_id WHERE v.contract_id = ? AND l.kind = 0 GROUP BY l.invoice_id',
+      variables: [Variable.withInt(contractId)],
+      readsFrom: {db.invoiceLines, db.invoices},
+    ).get();
+    return {for (final r in rows) r.read<int>('i'): r.read<int>('s')};
+  }
+
+  /// Imputation chronologique des paiements selon le mode d'avance du contrat.
+  static Future<AdvanceLedger> ledger(Contract c) async {
+    final invs = await (db.select(db.invoices)..where((i) => i.contractId.equals(c.id))).get();
+    final pays = await (db.select(db.payments)..where((p) => p.contractId.equals(c.id))).get();
+    return ledgerOf(invs, await rentParts(c.id), pays, advanceModeOf(c));
+  }
+
+  /// Une facture mensuelle est due à partir du 1er de son mois : ce qui a été versé avant est une avance.
+  static AdvanceLedger ledgerOf(List<Invoice> invoices, Map<int, int> rent, List<Payment> pays, AdvanceMode mode) {
+    final sorted = [...invoices]
+      ..sort((a, b) {
+        final c = a.period.compareTo(b.period);
+        return c != 0 ? c : a.kind.compareTo(b.kind);
+      });
+    DateTime start(Invoice i) {
+      if (i.kind != 0) return i.issueDate;
+      final first = DateTime(Period.year(i.period), Period.month(i.period));
+      return i.issueDate.isBefore(first) ? i.issueDate : first;
+    }
+
+    return AdvanceLedger.run(
+      [
+        for (final i in sorted) DebtItem(i.id, start(i), total: i.total, rent: rent[i.id] ?? 0),
+        // Pénalité (kind 4) : une charge, jamais couverte par une avance « loyer uniquement ».
+        for (final p in pays.where((p) => p.kind == 4)) DebtItem('p${p.id}', p.date, total: p.amount),
+      ],
+      [
+        for (final p in pays)
+          if (p.kind == 0 || p.kind == 1) MoneyEvent(p.date, p.amount) else if (p.kind == 2) MoneyEvent(p.date, -p.amount),
+      ],
+      mode,
+    );
+  }
+
+  static Allocation allocationOf(DebtState s) {
+    final total = s.item.total;
+    final status = total <= 0 || s.remaining == 0
+        ? PayStatus.paid
+        : s.remaining < total
+            ? PayStatus.partial
+            : PayStatus.unpaid;
+    return Allocation(status, s.remaining, s.creditBefore, s.applied);
   }
 
   static Future<ContractView> contract(int id) async {
@@ -197,9 +274,8 @@ class Repo {
     ])
       ..where(db.contracts.id.equals(id));
     final r = await q.getSingle();
-    final bal = await balances();
-    return ContractView(r.readTable(db.contracts), r.readTable(db.tenants),
-        r.readTable(db.apartments), r.readTable(db.buildings), bal[id] ?? 0);
+    return _view(r.readTable(db.contracts), r.readTable(db.tenants), r.readTable(db.apartments),
+        r.readTable(db.buildings), await balances());
   }
 
   /// Affecte les paiements aux factures les plus anciennes (FIFO).
@@ -254,9 +330,16 @@ class Repo {
     final result = <InvoiceView>[];
     for (final cid in contractIds) {
       final all = await (db.select(db.invoices)..where((i) => i.contractId.equals(cid))).get();
-      final alloc = allocate(all, await credit(cid));
       final maxPeriod = all.where((i) => i.kind == 0).fold<int>(0, (m, i) => i.period > m ? i.period : m);
       final cv = cvs[cid]!;
+      final Map<int, Allocation> alloc;
+      if (cv.advanceMode == AdvanceMode.all) {
+        alloc = allocate(all, await credit(cid));
+      } else {
+        final pays = await (db.select(db.payments)..where((p) => p.contractId.equals(cid))).get();
+        final l = ledgerOf(all, await rentParts(cid), pays, cv.advanceMode);
+        alloc = {for (final i in all) i.id: allocationOf(l.of(i.id)!)};
+      }
       for (final inv in list.where((i) => i.contractId == cid)) {
         final locked = inv.kind == 1 || !cv.active || inv.period < maxPeriod;
         result.add(InvoiceView(inv, cv, alloc[inv.id]!, locked));

@@ -2472,4 +2472,37 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get yes => 'Oui';
+
+  @override
+  String get advanceUse => 'Utilisation de l\'avance';
+
+  @override
+  String get advanceRentAndCharges => 'Loyer et charges';
+
+  @override
+  String get advanceRentOnly => 'Loyer uniquement';
+
+  @override
+  String advanceFollowApp(String mode) {
+    return 'Réglage de l\'application ($mode)';
+  }
+
+  @override
+  String get appSettingShort => 'réglage de l\'app';
+
+  @override
+  String get advanceHelp =>
+      'Quand le locataire a payé d\'avance, cette avance règle les factures suivantes : soit en entier, soit uniquement le loyer (les charges restent à payer).';
+
+  @override
+  String get advancePerTenant => 'Chaque bail peut avoir son propre réglage.';
+
+  @override
+  String advanceOnRent(String amount) {
+    return 'Avance sur le loyer : $amount';
+  }
+
+  @override
+  String get pdfAdvanceRentOnly =>
+      'L\'avance du locataire ne règle que le loyer ; les charges sont à payer.';
 }

@@ -79,7 +79,6 @@ class ContractTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final b = cv.balance;
     return AppCard(
       onTap: () => push(context, ContractDetailPage(cv.c.id)),
       child: Row(children: [
@@ -102,12 +101,12 @@ class ContractTile extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: 4),
               child: StatusChip(context.t.depositIncompleteShort, AppColors.warning, icon: Icons.savings_rounded),
             ),
-          if (b > 0)
-            StatusChip(context.t.dueAmount(Money.compact(b)), AppColors.danger)
-          else if (b < 0)
-            StatusChip(cv.active ? context.t.advanceAmount(Money.compact(-b)) : context.t.toRefund, AppColors.info)
-          else
-            StatusChip(context.t.upToDate, AppColors.success),
+          // Charges dues et avance sur le loyer peuvent coexister (avance « loyer uniquement »).
+          if (cv.due > 0) StatusChip(context.t.dueAmount(Money.compact(cv.due)), AppColors.danger),
+          if (cv.due > 0 && cv.advance > 0) const SizedBox(height: 4),
+          if (cv.advance > 0)
+            StatusChip(cv.active ? context.t.advanceAmount(Money.compact(cv.advance)) : context.t.toRefund, AppColors.info),
+          if (cv.due == 0 && cv.advance == 0) StatusChip(context.t.upToDate, AppColors.success),
         ]),
       ]),
     );

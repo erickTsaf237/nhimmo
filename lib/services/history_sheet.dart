@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 
+import '../core/advance.dart';
 import '../core/dates.dart';
 import '../data/database.dart';
 import '../data/repo.dart';
@@ -21,6 +22,7 @@ class SheetRow {
   final int rent;
   final int other; // services, avantages, dégâts, ajustements
   int penalty = 0;
+  final penaltyIds = <int>{};
   int paid = 0;
   DateTime? settledOn;
   DateTime? lastPaymentOn;
@@ -81,6 +83,27 @@ class HistorySheet {
       final pp = Period.of(p.date);
       final target = rows.lastWhere((r) => r.invoice.period <= pp, orElse: () => rows.first);
       target.penalty += p.amount;
+      target.penaltyIds.add(p.id);
+    }
+
+    // Avance « loyer uniquement » : même imputation que le reste de l'application (dates, loyer seul).
+    if (cv.advanceMode == AdvanceMode.rentOnly) {
+      final ledger = Repo.ledgerOf(invoices, await Repo.rentParts(contractId), payments, cv.advanceMode);
+      for (final r in rows) {
+        final states = [
+          ledger.of(r.invoice.id)!,
+          for (final p in payments.where((p) => p.kind == PaymentKind.penalty && r.penaltyIds.contains(p.id)))
+            ledger.of('p${p.id}')!,
+        ];
+        r.paid = states.fold(0, (s, d) => s + d.paid);
+        final paidOn = states.map((d) => d.lastPaidOn).whereType<DateTime>().toList()..sort();
+        r.lastPaymentOn = paidOn.lastOrNull;
+        if (states.every((d) => d.remaining == 0)) {
+          final settled = states.map((d) => d.settledOn).whereType<DateTime>().toList()..sort();
+          r.settledOn = settled.lastOrNull ?? r.lastPaymentOn;
+        }
+      }
+      return _finish(cv, allTypes, usedTypes, rows, contractId);
     }
 
     // Paiements (et caution imputée) : du plus ancien au plus récent, sur les montants attendus les plus anciens.
@@ -96,7 +119,12 @@ class HistorySheet {
         if (r.remaining == 0) r.settledOn = p.date;
       }
     }
+    return _finish(cv, allTypes, usedTypes, rows, contractId);
+  }
 
+  static Future<HistorySheet> _finish(
+      ContractView cv, Map<int, UtilityType> allTypes, Set<int> usedTypes, List<SheetRow> rows, int contractId) async {
+    final db = App.db;
     final types = allTypes.values.where((t) => usedTypes.contains(t.id)).toList()..sort((a, b) => a.id.compareTo(b.id));
     final rents = await (db.select(db.contractRents)
           ..where((r) => r.contractId.equals(contractId))

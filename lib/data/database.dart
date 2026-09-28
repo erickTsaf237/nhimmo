@@ -144,6 +144,10 @@ class Contracts extends Table {
   IntColumn get firstRentAmount => integer().nullable()();
   TextColumn get firstRentNote => text().nullable()();
 
+  /// Avance du locataire : 0 = règle loyer et charges, 1 = loyer uniquement (voir AdvanceMode) ;
+  /// null = réglage de l'application.
+  IntColumn get advanceMode => integer().nullable()();
+
   /// 0 = actif, 1 = terminé.
   IntColumn get status => integer().withDefault(const Constant(0))();
   DateTimeColumn get exitDate => dateTime().nullable()();
@@ -320,7 +324,7 @@ class AppDatabase extends _$AppDatabase {
   }
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -339,6 +343,9 @@ class AppDatabase extends _$AppDatabase {
             await m.addColumn(serviceTypes, serviceTypes.translations);
             await m.addColumn(invoiceLines, invoiceLines.meta);
             await _translateSeeds();
+          }
+          if (from < 6) {
+            await m.addColumn(contracts, contracts.advanceMode);
           }
           if (from < 5) {
             await m.addColumn(buildings, buildings.latePenalty);

@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart' hide Column;
 import 'package:flutter/material.dart';
 
+import '../../core/advance.dart';
 import '../../core/dates.dart';
 import '../../core/money.dart';
 import '../../data/database.dart';
@@ -55,6 +56,9 @@ class _ContractFormState extends State<ContractForm> {
   late DateTime? _plannedEnd = widget.contract?.plannedEndDate;
   /// Premier loyer (payé à la signature) : 0 prorata, 1 mois complet, 2 forfait.
   late int _firstMode = widget.contract?.firstRentMode ?? 0;
+
+  /// Imputation de l'avance propre à ce locataire (null = réglage de l'application).
+  late int? _advanceMode = widget.contract?.advanceMode;
   late final _firstAmount = TextEditingController(
       text: widget.contract?.firstRentAmount == null ? '' : Money.toInput(widget.contract!.firstRentAmount!));
   late final _firstNote = TextEditingController(text: widget.contract?.firstRentNote);
@@ -135,6 +139,7 @@ class _ContractFormState extends State<ContractForm> {
         firstRentMode: Value(_firstMode),
         firstRentAmount: Value(_firstMode == 2 ? Money.parse(_firstAmount.text) : null),
         firstRentNote: Value(_firstMode == 2 ? emptyToNull(_firstNote.text) : null),
+        advanceMode: Value(_advanceMode),
         tacitRenewal: Value(_tacit),
         notes: Value(emptyToNull(_notes.text)),
       );
@@ -320,6 +325,30 @@ class _ContractFormState extends State<ContractForm> {
               AmountField(_firstAmount, context.t.firstRentAmount),
               Field(_firstNote, context.t.firstRentNote, icon: Icons.notes, hint: context.t.firstRentNoteHint),
             ],
+            SectionHeader(context.t.advanceUse),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: DropdownButtonFormField<int?>(
+                initialValue: _advanceMode,
+                isExpanded: true,
+                decoration: const InputDecoration(prefixIcon: Icon(Icons.savings_outlined)),
+                items: [
+                  DropdownMenuItem(
+                      value: null,
+                      child: Text(context.t.advanceFollowApp(App.settings.advanceMode == AdvanceMode.rentOnly.index
+                          ? context.t.advanceRentOnly
+                          : context.t.advanceRentAndCharges))),
+                  DropdownMenuItem(value: AdvanceMode.all.index, child: Text(context.t.advanceRentAndCharges)),
+                  DropdownMenuItem(value: AdvanceMode.rentOnly.index, child: Text(context.t.advanceRentOnly)),
+                ],
+                onChanged: (v) => setState(() => _advanceMode = v),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(4, 0, 4, 14),
+              child: Text(context.t.advanceHelp,
+                  style: TextStyle(fontSize: 12.5, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+            ),
             SectionHeader(context.t.services,
                 trailing: d.services.isEmpty
                     ? null

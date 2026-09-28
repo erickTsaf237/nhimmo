@@ -4071,6 +4071,17 @@ class $ContractsTable extends Contracts
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _advanceModeMeta = const VerificationMeta(
+    'advanceMode',
+  );
+  @override
+  late final GeneratedColumn<int> advanceMode = GeneratedColumn<int>(
+    'advance_mode',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _statusMeta = const VerificationMeta('status');
   @override
   late final GeneratedColumn<int> status = GeneratedColumn<int>(
@@ -4153,6 +4164,7 @@ class $ContractsTable extends Contracts
     firstRentMode,
     firstRentAmount,
     firstRentNote,
+    advanceMode,
     status,
     exitDate,
     exitProrata,
@@ -4279,6 +4291,15 @@ class $ContractsTable extends Contracts
         ),
       );
     }
+    if (data.containsKey('advance_mode')) {
+      context.handle(
+        _advanceModeMeta,
+        advanceMode.isAcceptableOrUnknown(
+          data['advance_mode']!,
+          _advanceModeMeta,
+        ),
+      );
+    }
     if (data.containsKey('status')) {
       context.handle(
         _statusMeta,
@@ -4382,6 +4403,10 @@ class $ContractsTable extends Contracts
         DriftSqlType.string,
         data['${effectivePrefix}first_rent_note'],
       ),
+      advanceMode: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}advance_mode'],
+      ),
       status: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}status'],
@@ -4438,6 +4463,10 @@ class Contract extends DataClass implements Insertable<Contract> {
   final int? firstRentAmount;
   final String? firstRentNote;
 
+  /// Avance du locataire : 0 = règle loyer et charges, 1 = loyer uniquement (voir AdvanceMode) ;
+  /// null = réglage de l'application.
+  final int? advanceMode;
+
   /// 0 = actif, 1 = terminé.
   final int status;
   final DateTime? exitDate;
@@ -4459,6 +4488,7 @@ class Contract extends DataClass implements Insertable<Contract> {
     required this.firstRentMode,
     this.firstRentAmount,
     this.firstRentNote,
+    this.advanceMode,
     required this.status,
     this.exitDate,
     this.exitProrata,
@@ -4487,6 +4517,9 @@ class Contract extends DataClass implements Insertable<Contract> {
     }
     if (!nullToAbsent || firstRentNote != null) {
       map['first_rent_note'] = Variable<String>(firstRentNote);
+    }
+    if (!nullToAbsent || advanceMode != null) {
+      map['advance_mode'] = Variable<int>(advanceMode);
     }
     map['status'] = Variable<int>(status);
     if (!nullToAbsent || exitDate != null) {
@@ -4526,6 +4559,9 @@ class Contract extends DataClass implements Insertable<Contract> {
       firstRentNote: firstRentNote == null && nullToAbsent
           ? const Value.absent()
           : Value(firstRentNote),
+      advanceMode: advanceMode == null && nullToAbsent
+          ? const Value.absent()
+          : Value(advanceMode),
       status: Value(status),
       exitDate: exitDate == null && nullToAbsent
           ? const Value.absent()
@@ -4562,6 +4598,7 @@ class Contract extends DataClass implements Insertable<Contract> {
       firstRentMode: serializer.fromJson<int>(json['firstRentMode']),
       firstRentAmount: serializer.fromJson<int?>(json['firstRentAmount']),
       firstRentNote: serializer.fromJson<String?>(json['firstRentNote']),
+      advanceMode: serializer.fromJson<int?>(json['advanceMode']),
       status: serializer.fromJson<int>(json['status']),
       exitDate: serializer.fromJson<DateTime?>(json['exitDate']),
       exitProrata: serializer.fromJson<bool?>(json['exitProrata']),
@@ -4587,6 +4624,7 @@ class Contract extends DataClass implements Insertable<Contract> {
       'firstRentMode': serializer.toJson<int>(firstRentMode),
       'firstRentAmount': serializer.toJson<int?>(firstRentAmount),
       'firstRentNote': serializer.toJson<String?>(firstRentNote),
+      'advanceMode': serializer.toJson<int?>(advanceMode),
       'status': serializer.toJson<int>(status),
       'exitDate': serializer.toJson<DateTime?>(exitDate),
       'exitProrata': serializer.toJson<bool?>(exitProrata),
@@ -4610,6 +4648,7 @@ class Contract extends DataClass implements Insertable<Contract> {
     int? firstRentMode,
     Value<int?> firstRentAmount = const Value.absent(),
     Value<String?> firstRentNote = const Value.absent(),
+    Value<int?> advanceMode = const Value.absent(),
     int? status,
     Value<DateTime?> exitDate = const Value.absent(),
     Value<bool?> exitProrata = const Value.absent(),
@@ -4636,6 +4675,7 @@ class Contract extends DataClass implements Insertable<Contract> {
     firstRentNote: firstRentNote.present
         ? firstRentNote.value
         : this.firstRentNote,
+    advanceMode: advanceMode.present ? advanceMode.value : this.advanceMode,
     status: status ?? this.status,
     exitDate: exitDate.present ? exitDate.value : this.exitDate,
     exitProrata: exitProrata.present ? exitProrata.value : this.exitProrata,
@@ -4674,6 +4714,9 @@ class Contract extends DataClass implements Insertable<Contract> {
       firstRentNote: data.firstRentNote.present
           ? data.firstRentNote.value
           : this.firstRentNote,
+      advanceMode: data.advanceMode.present
+          ? data.advanceMode.value
+          : this.advanceMode,
       status: data.status.present ? data.status.value : this.status,
       exitDate: data.exitDate.present ? data.exitDate.value : this.exitDate,
       exitProrata: data.exitProrata.present
@@ -4703,6 +4746,7 @@ class Contract extends DataClass implements Insertable<Contract> {
           ..write('firstRentMode: $firstRentMode, ')
           ..write('firstRentAmount: $firstRentAmount, ')
           ..write('firstRentNote: $firstRentNote, ')
+          ..write('advanceMode: $advanceMode, ')
           ..write('status: $status, ')
           ..write('exitDate: $exitDate, ')
           ..write('exitProrata: $exitProrata, ')
@@ -4728,6 +4772,7 @@ class Contract extends DataClass implements Insertable<Contract> {
     firstRentMode,
     firstRentAmount,
     firstRentNote,
+    advanceMode,
     status,
     exitDate,
     exitProrata,
@@ -4752,6 +4797,7 @@ class Contract extends DataClass implements Insertable<Contract> {
           other.firstRentMode == this.firstRentMode &&
           other.firstRentAmount == this.firstRentAmount &&
           other.firstRentNote == this.firstRentNote &&
+          other.advanceMode == this.advanceMode &&
           other.status == this.status &&
           other.exitDate == this.exitDate &&
           other.exitProrata == this.exitProrata &&
@@ -4774,6 +4820,7 @@ class ContractsCompanion extends UpdateCompanion<Contract> {
   final Value<int> firstRentMode;
   final Value<int?> firstRentAmount;
   final Value<String?> firstRentNote;
+  final Value<int?> advanceMode;
   final Value<int> status;
   final Value<DateTime?> exitDate;
   final Value<bool?> exitProrata;
@@ -4794,6 +4841,7 @@ class ContractsCompanion extends UpdateCompanion<Contract> {
     this.firstRentMode = const Value.absent(),
     this.firstRentAmount = const Value.absent(),
     this.firstRentNote = const Value.absent(),
+    this.advanceMode = const Value.absent(),
     this.status = const Value.absent(),
     this.exitDate = const Value.absent(),
     this.exitProrata = const Value.absent(),
@@ -4815,6 +4863,7 @@ class ContractsCompanion extends UpdateCompanion<Contract> {
     this.firstRentMode = const Value.absent(),
     this.firstRentAmount = const Value.absent(),
     this.firstRentNote = const Value.absent(),
+    this.advanceMode = const Value.absent(),
     this.status = const Value.absent(),
     this.exitDate = const Value.absent(),
     this.exitProrata = const Value.absent(),
@@ -4839,6 +4888,7 @@ class ContractsCompanion extends UpdateCompanion<Contract> {
     Expression<int>? firstRentMode,
     Expression<int>? firstRentAmount,
     Expression<String>? firstRentNote,
+    Expression<int>? advanceMode,
     Expression<int>? status,
     Expression<DateTime>? exitDate,
     Expression<bool>? exitProrata,
@@ -4860,6 +4910,7 @@ class ContractsCompanion extends UpdateCompanion<Contract> {
       if (firstRentMode != null) 'first_rent_mode': firstRentMode,
       if (firstRentAmount != null) 'first_rent_amount': firstRentAmount,
       if (firstRentNote != null) 'first_rent_note': firstRentNote,
+      if (advanceMode != null) 'advance_mode': advanceMode,
       if (status != null) 'status': status,
       if (exitDate != null) 'exit_date': exitDate,
       if (exitProrata != null) 'exit_prorata': exitProrata,
@@ -4883,6 +4934,7 @@ class ContractsCompanion extends UpdateCompanion<Contract> {
     Value<int>? firstRentMode,
     Value<int?>? firstRentAmount,
     Value<String?>? firstRentNote,
+    Value<int?>? advanceMode,
     Value<int>? status,
     Value<DateTime?>? exitDate,
     Value<bool?>? exitProrata,
@@ -4904,6 +4956,7 @@ class ContractsCompanion extends UpdateCompanion<Contract> {
       firstRentMode: firstRentMode ?? this.firstRentMode,
       firstRentAmount: firstRentAmount ?? this.firstRentAmount,
       firstRentNote: firstRentNote ?? this.firstRentNote,
+      advanceMode: advanceMode ?? this.advanceMode,
       status: status ?? this.status,
       exitDate: exitDate ?? this.exitDate,
       exitProrata: exitProrata ?? this.exitProrata,
@@ -4955,6 +5008,9 @@ class ContractsCompanion extends UpdateCompanion<Contract> {
     if (firstRentNote.present) {
       map['first_rent_note'] = Variable<String>(firstRentNote.value);
     }
+    if (advanceMode.present) {
+      map['advance_mode'] = Variable<int>(advanceMode.value);
+    }
     if (status.present) {
       map['status'] = Variable<int>(status.value);
     }
@@ -4992,6 +5048,7 @@ class ContractsCompanion extends UpdateCompanion<Contract> {
           ..write('firstRentMode: $firstRentMode, ')
           ..write('firstRentAmount: $firstRentAmount, ')
           ..write('firstRentNote: $firstRentNote, ')
+          ..write('advanceMode: $advanceMode, ')
           ..write('status: $status, ')
           ..write('exitDate: $exitDate, ')
           ..write('exitProrata: $exitProrata, ')
@@ -13665,6 +13722,7 @@ typedef $$ContractsTableCreateCompanionBuilder =
       Value<int> firstRentMode,
       Value<int?> firstRentAmount,
       Value<String?> firstRentNote,
+      Value<int?> advanceMode,
       Value<int> status,
       Value<DateTime?> exitDate,
       Value<bool?> exitProrata,
@@ -13687,6 +13745,7 @@ typedef $$ContractsTableUpdateCompanionBuilder =
       Value<int> firstRentMode,
       Value<int?> firstRentAmount,
       Value<String?> firstRentNote,
+      Value<int?> advanceMode,
       Value<int> status,
       Value<DateTime?> exitDate,
       Value<bool?> exitProrata,
@@ -13939,6 +13998,11 @@ class $$ContractsTableFilterComposer
 
   ColumnFilters<String> get firstRentNote => $composableBuilder(
     column: $table.firstRentNote,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get advanceMode => $composableBuilder(
+    column: $table.advanceMode,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -14258,6 +14322,11 @@ class $$ContractsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get advanceMode => $composableBuilder(
+    column: $table.advanceMode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get status => $composableBuilder(
     column: $table.status,
     builder: (column) => ColumnOrderings(column),
@@ -14388,6 +14457,11 @@ class $$ContractsTableAnnotationComposer
 
   GeneratedColumn<String> get firstRentNote => $composableBuilder(
     column: $table.firstRentNote,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get advanceMode => $composableBuilder(
+    column: $table.advanceMode,
     builder: (column) => column,
   );
 
@@ -14686,6 +14760,7 @@ class $$ContractsTableTableManager
                 Value<int> firstRentMode = const Value.absent(),
                 Value<int?> firstRentAmount = const Value.absent(),
                 Value<String?> firstRentNote = const Value.absent(),
+                Value<int?> advanceMode = const Value.absent(),
                 Value<int> status = const Value.absent(),
                 Value<DateTime?> exitDate = const Value.absent(),
                 Value<bool?> exitProrata = const Value.absent(),
@@ -14706,6 +14781,7 @@ class $$ContractsTableTableManager
                 firstRentMode: firstRentMode,
                 firstRentAmount: firstRentAmount,
                 firstRentNote: firstRentNote,
+                advanceMode: advanceMode,
                 status: status,
                 exitDate: exitDate,
                 exitProrata: exitProrata,
@@ -14728,6 +14804,7 @@ class $$ContractsTableTableManager
                 Value<int> firstRentMode = const Value.absent(),
                 Value<int?> firstRentAmount = const Value.absent(),
                 Value<String?> firstRentNote = const Value.absent(),
+                Value<int?> advanceMode = const Value.absent(),
                 Value<int> status = const Value.absent(),
                 Value<DateTime?> exitDate = const Value.absent(),
                 Value<bool?> exitProrata = const Value.absent(),
@@ -14748,6 +14825,7 @@ class $$ContractsTableTableManager
                 firstRentMode: firstRentMode,
                 firstRentAmount: firstRentAmount,
                 firstRentNote: firstRentNote,
+                advanceMode: advanceMode,
                 status: status,
                 exitDate: exitDate,
                 exitProrata: exitProrata,

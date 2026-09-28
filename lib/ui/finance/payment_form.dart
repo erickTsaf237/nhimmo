@@ -73,7 +73,7 @@ class _PaymentFormState extends State<PaymentForm> {
     _debounce = Timer(const Duration(milliseconds: 500), () {
       if (!mounted) return;
       final pen = _penaltyOn ? (Money.parse(_penalty.text) ?? 0) : 0;
-      final due = cv.balance + pen;
+      final due = cv.due + pen;
       setState(() {
         _computing = false;
         _expected = _penaltyOn ? due : null;
@@ -103,7 +103,7 @@ class _PaymentFormState extends State<PaymentForm> {
         final cv = contracts.where((c) => c.c.id == _contractId).firstOrNull;
         if (cv != null && !_prefilled) {
           _prefilled = true;
-          final due = _deposit ? cv.c.deposit - cv.c.depositPaid : _refund ? -cv.balance : cv.balance;
+          final due = _deposit ? cv.c.deposit - cv.c.depositPaid : _refund ? cv.advance : cv.due;
           if (due > 0) _amount.text = Money.toInput(due);
         }
         return FormPage(
@@ -207,13 +207,18 @@ class _PaymentFormState extends State<PaymentForm> {
               Padding(
                 padding: const EdgeInsets.only(bottom: 14),
                 child: AppCard(
-                  color: (cv.balance > 0 ? AppColors.danger : AppColors.success).withValues(alpha: .08),
-                  child: InfoRow(
-                    cv.balance > 0 ? t.balanceDue : cv.balance < 0 ? t.inTenantFavor : t.accountUpToDate,
-                    Money.format(cv.balance.abs()),
-                    strong: true,
-                    color: cv.balance > 0 ? AppColors.danger : AppColors.success,
-                  ),
+                  color: (cv.due > 0 ? AppColors.danger : AppColors.success).withValues(alpha: .08),
+                  child: Column(children: [
+                    InfoRow(
+                      cv.due > 0 ? t.balanceDue : cv.advance > 0 ? t.inTenantFavor : t.accountUpToDate,
+                      Money.format(cv.due > 0 ? cv.due : cv.advance),
+                      strong: true,
+                      color: cv.due > 0 ? AppColors.danger : AppColors.success,
+                    ),
+                    // Avance réservée au loyer : les charges ci-dessus restent à payer.
+                    if (cv.due > 0 && cv.advance > 0)
+                      InfoRow(t.inTenantFavor, Money.format(cv.advance), color: AppColors.success),
+                  ]),
                 ),
               ),
             if (cv != null && _canPenalize) ...[
@@ -252,7 +257,7 @@ class _PaymentFormState extends State<PaymentForm> {
                                 key: const ValueKey('expected'),
                                 color: AppColors.warning.withValues(alpha: .10),
                                 child: Column(children: [
-                                  InfoRow(t.balanceDue, Money.format(cv.balance)),
+                                  InfoRow(t.balanceDue, Money.format(cv.due)),
                                   InfoRow(t.latePenalty, '+ ${Money.format(Money.parse(_penalty.text) ?? 0)}', color: AppColors.danger),
                                   const Divider(height: 16),
                                   InfoRow(t.newExpectedTotal, Money.format(_expected!), strong: true, color: AppColors.danger),

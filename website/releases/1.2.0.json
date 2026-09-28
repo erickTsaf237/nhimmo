@@ -1,0 +1,55 @@
+{
+  "version": "1.2.0",
+  "build": 4,
+  "date": "2026-09-28",
+  "published": true,
+  "minAndroid": "7.0",
+  "notes": {
+    "fr": {
+      "summary": "Choix de l'utilisation de l'avance du locataire : loyer et charges, ou loyer uniquement.",
+      "added": [
+        "Utilisation de l'avance : l'avance du locataire peut régler les factures suivantes en entier (loyer et charges) ou seulement le loyer, les charges restant à payer chaque mois.",
+        "Réglage général dans Paramètres → Général → Facturation, modifiable pour chaque bail sans toucher aux autres locataires.",
+        "Charges dues et avance sur le loyer affichées séparément (locations, fiche du bail, encaissement, tableau de bord, reçus, fiche historique, export Excel)."
+      ],
+      "improved": [
+        "Les noms de locataires trop longs sont raccourcis proprement sur les fiches des logements."
+      ],
+      "fixed": []
+    },
+    "en": {
+      "summary": "Choose how a tenant's advance payment is used: rent and charges, or rent only.",
+      "added": [
+        "Use of advance payments: a tenant's advance can settle the next invoices in full (rent and charges) or the rent only, with charges still paid every month.",
+        "Default setting in Settings → General → Billing, adjustable for each lease without affecting other tenants.",
+        "Charges due and advance on rent shown separately (rentals, lease page, payments, dashboard, receipts, history sheet, Excel export)."
+      ],
+      "improved": [
+        "Long tenant names are neatly shortened on apartment cards."
+      ],
+      "fixed": []
+    }
+  },
+  "files": {
+    "universal": {
+      "path": "releases/1.2.0/nhimmo-1.2.0-universal.apk",
+      "size": 88782337,
+      "sha256": "b076f7a8ad149265282fbaf13c254579843786de7db1c7beee1d8faaaaca2bfe"
+    },
+    "arm64": {
+      "path": "releases/1.2.0/nhimmo-1.2.0-arm64.apk",
+      "size": 31961538,
+      "sha256": "e84ec3fe756fc557faa84a141f93087f02c663c1b0622e097aeaa1494784dabc"
+    },
+    "armv7": {
+      "path": "releases/1.2.0/nhimmo-1.2.0-armv7.apk",
+      "size": 28634164,
+      "sha256": "092ac39bf670d62f077e5dd0cf523c9e5a3f8fddc8b048186ffeae605299b678"
+    },
+    "x86_64": {
+      "path": "releases/1.2.0/nhimmo-1.2.0-x86_64.apk",
+      "size": 34435517,
+      "sha256": "9ca85f7b2c3a1d822571eb8a9bfbce7dad743d1188bda0f6a2e51297064a727c"
+    }
+  }
+}

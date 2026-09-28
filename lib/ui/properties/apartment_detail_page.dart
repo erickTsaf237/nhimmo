@@ -206,8 +206,10 @@ class ApartmentDetailPage extends StatelessWidget {
                                 style: TextStyle(fontSize: 12.5, color: cs.onSurfaceVariant)),
                           ]),
                         ),
-                        if (c.balance != 0)
-                          StatusChip(Money.compact(c.balance), c.balance > 0 ? AppColors.danger : AppColors.success),
+                        if (c.due > 0)
+                          StatusChip(Money.compact(c.due), AppColors.danger)
+                        else if (c.advance > 0)
+                          StatusChip(Money.compact(c.advance), AppColors.success),
                       ]),
                     ),
                   ),
